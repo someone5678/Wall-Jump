@@ -1,9 +1,11 @@
 package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
+import genandnic.walljump.ModConfig;
 import genandnic.walljump.WallJump;
+import genandnic.walljump.WallJumpClient;
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.input.Input;
@@ -61,11 +63,10 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
 
     private void doWallJump() {
-
         if(!this.canWallJump()) return;
 
         if(this.onGround
-                || this.abilities.flying
+                || this.getAbilities().flying
                 || !this.world.getFluidState(this.getBlockPos()).isEmpty()
                 || this.isRiding()
         ) {
@@ -79,7 +80,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         }
 
         this.updateWalls();
-        this.ticksKeyDown = input.sneaking ? this.ticksKeyDown + 1 : 0;
+        this.ticksKeyDown = WallJumpClient.toggleWallJump ? this.ticksKeyDown + 1 : 0;
 
         if(this.ticksWallClinged < 1) {
 
@@ -92,9 +93,9 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
                 this.limbDistance = 2.5F;
                 this.lastLimbDistance = 2.5F;
 
-                if (WallJump.CONFIGURATION.autoRotation()) {
-                    this.yaw = this.getClingDirection().getOpposite().asRotation();
-                    this.prevYaw = this.yaw;
+                if (ModConfig.getConfig().autoRotation) {
+                    this.setYaw(this.getClingDirection().getOpposite().asRotation());
+                    this.prevYaw = this.getYaw();
                 }
 
                 this.ticksWallClinged = 1;
@@ -108,7 +109,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
             return;
         }
 
-        if(!input.sneaking
+        if(!WallJumpClient.toggleWallJump
                 || this.onGround
                 || !this.world.getFluidState(this.getBlockPos()).isEmpty()
                 || this.walls.isEmpty()
@@ -126,18 +127,18 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
                 PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
                 passedData.writeBoolean(true);
-                ClientSidePacketRegistry.INSTANCE.sendToServer(WallJump.WALL_JUMP_PACKET_ID, passedData);
+                ClientPlayNetworking.send(WallJump.WALL_JUMP_PACKET_ID, passedData);
 
-                this.wallJump((float) WallJump.CONFIGURATION.wallJumpHeight());
+                this.wallJump((float) ModConfig.getConfig().wallJumpHeight);
                 this.staleWalls = new HashSet<>(this.walls);
             }
 
             return;
         }
 
-        if(WallJump.CONFIGURATION.autoRotation()) {
-            this.yaw = this.getClingDirection().getOpposite().asRotation();
-            this.prevYaw = this.yaw;
+        if(ModConfig.getConfig().autoRotation) {
+            this.setYaw(this.getClingDirection().getOpposite().asRotation());
+            this.prevYaw = this.getYaw();
         }
 
         this.setPos(this.clingX, this.getY(), this.clingZ);
@@ -153,7 +154,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
             motionY = motionY + 0.2;
             this.spawnWallParticle(this.getWallPos());
 
-        } else if(this.ticksWallClinged++ > WallJump.CONFIGURATION.wallSlideDelay()) {
+        } else if(this.ticksWallClinged++ > ModConfig.getConfig().wallSlideDelay) {
 
             motionY = -0.1;
             this.spawnWallParticle(this.getWallPos());
@@ -169,7 +170,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
             PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
             passedData.writeFloat((float) (motionY * motionY * 8));
-            ClientSidePacketRegistry.INSTANCE.sendToServer(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
+            ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
         }
 
         this.setVelocity(0.0, motionY, 0.0);
@@ -178,7 +179,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
     private boolean canWallJump() {
 
-        if(WallJump.CONFIGURATION.useWallJump()) return true;
+        if(ModConfig.getConfig().useWallJump) return true;
 
         ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
         if(!stack.isEmpty()) {
@@ -194,10 +195,10 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         if(this.isClimbing() || this.getVelocity().getY() > 0.1 || this.getHungerManager().getFoodLevel() < 1)
             return false;
 
-        if(!this.world.doesNotCollide(this.getBoundingBox().offset(0, -0.8, 0)))
+        if(!this.world.isSpaceEmpty(this.getBoundingBox().offset(0, -0.8, 0)))
             return false;
 
-        if(WallJump.CONFIGURATION.allowReClinging() || this.getY() < this.lastJumpY - 1)
+        if(ModConfig.getConfig().allowReclinging || this.getY() < this.lastJumpY - 1)
             return true;
 
         return !this.staleWalls.containsAll(this.walls);
@@ -231,7 +232,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         for (Box axis : axes) {
             direction = Direction.fromHorizontal(i++);
 
-            if(!this.world.doesNotCollide(axis)) {
+            if(!this.world.isSpaceEmpty(axis)) {
                this.walls.add(direction);
                this.horizontalCollision = true;
             }

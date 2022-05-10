@@ -1,6 +1,7 @@
 package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
+import genandnic.walljump.ModConfig;
 import genandnic.walljump.WallJump;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -44,7 +45,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
         if(jumpBoostEffect != null)
             jumpBoostLevel = jumpBoostEffect.getAmplifier() + 1;
 
-        this.flyingSpeed = (float) (this.getMovementSpeed() * (this.isSprinting() ? 1 : 1.3) / 5) * (jumpBoostLevel * 0.5F + 1);
+        this.getAbilities().setFlySpeed((float) (this.getMovementSpeed() * (this.isSprinting() ? 1 : 1.3) / 5) * (jumpBoostLevel * 0.5F + 1));
 
         Vec3d pos = this.getPos();
         Vec3d look = this.getRotationVector();
@@ -54,12 +55,12 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
 
             if (this.isSneaking()) {
 
-                if (this.pitch < 30F)
+                if (this.getPitch() < 30F)
                     this.setVelocity(motion.subtract(motion.multiply(0.05)));
 
             } else if (this.isSprinting()) {
 
-                float elytraSpeedBoost = (float) WallJump.CONFIGURATION.elytraSpeedBoost() + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
+                float elytraSpeedBoost = (float) ModConfig.getConfig().elytraSpeedBoost + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
                 Vec3d boost = new Vec3d(look.getX(), look.getY() + 0.5, look.getZ()).normalize().multiply(elytraSpeedBoost);
                 if(motion.length() <= boost.length())
                     this.setVelocity(motion.add(boost.multiply(0.05)));
@@ -71,7 +72,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
 
         } else if(this.isSprinting()) {
 
-            float sprintSpeedBoost = (float) WallJump.CONFIGURATION.sprintSpeedBoost() + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
+            float sprintSpeedBoost = (float) ModConfig.getConfig().sprintSpeedBoost + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
             if(!this.onGround)
                 sprintSpeedBoost /= 3.125;
 

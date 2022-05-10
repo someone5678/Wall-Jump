@@ -44,12 +44,5 @@ public class DoubleJumpEnchantment extends Enchantment {
     }
 
     @Override
-    public boolean isAcceptableItem(ItemStack stack) {
-
-        if(!WallJump.CONFIGURATION.enableEnchantments()) {
-            return false;
-        }
-
-        return stack.isEnchantable();
-    }
+    public boolean isAcceptableItem(ItemStack stack) {  return stack.isEnchantable();   }
 }

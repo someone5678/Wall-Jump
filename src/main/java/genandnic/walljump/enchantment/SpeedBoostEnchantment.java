@@ -33,12 +33,5 @@ public class SpeedBoostEnchantment extends Enchantment {
     }
 
     @Override
-    public boolean isAcceptableItem(ItemStack stack) {
-
-        if(!WallJump.CONFIGURATION.enableEnchantments()) {
-            return false;
-        }
-
-        return stack.isEnchantable() || stack.getItem() instanceof ElytraItem;
-    }
+    public boolean isAcceptableItem(ItemStack stack) {  return stack.isEnchantable() || stack.getItem() instanceof ElytraItem;  }
 }

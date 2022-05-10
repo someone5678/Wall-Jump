@@ -1,5 +1,6 @@
 package genandnic.walljump.enchantment;
 
+import genandnic.walljump.ModConfig;
 import genandnic.walljump.WallJump;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
@@ -35,7 +36,7 @@ public class WallJumpEnchantment extends Enchantment {
     @Override
     public boolean isAcceptableItem(ItemStack stack) {
 
-        if(WallJump.CONFIGURATION.useWallJump() || !WallJump.CONFIGURATION.enableEnchantments()) {
+        if(ModConfig.getConfig().useWallJump) {
             return false;
         }
 
