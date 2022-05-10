@@ -11,12 +11,16 @@ import static genandnic.walljump.WallJump.config;
 
 
 @Config(name = WallJump.MOD_ID)
-public class ModConfig implements ConfigData {
+public class WallJumpConfig implements ConfigData {
         @Comment("Allows you to climb up without alternating walls")
         public boolean allowReclinging = false;
 
         @Comment("Automatically turn the player when wall clinging")
         public boolean autoRotation = false;
+
+        @Comment("Enables Elytra Wall Cling: Clinging to the Wall with Elytra Deployed.")
+        @ConfigEntry.Gui.RequiresRestart
+        public boolean enableElytraWallCling = false;
 
         @Comment("Elytra speed boost; set to 0.0 to disable")
         @ConfigEntry.Gui.RequiresRestart
@@ -52,10 +56,10 @@ public class ModConfig implements ConfigData {
         @Comment("Ticks wall clinged before starting wall slide")
         public int wallSlideDelay = 20;
 
-        public static ModConfig getConfig() {
+        public static WallJumpConfig getConfig() {
                 if (config == null) {
-                        AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
-                        config = AutoConfig.getConfigHolder(ModConfig.class);
+                        AutoConfig.register(WallJumpConfig.class, JanksonConfigSerializer::new);
+                        config = AutoConfig.getConfigHolder(WallJumpConfig.class);
                 }
                 return config.getConfig();
         }

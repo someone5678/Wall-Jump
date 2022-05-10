@@ -25,7 +25,7 @@ public class WallJumpClient implements ClientModInitializer {
 	public static FallingSound FALLING_SOUND;
 
 	public void registerBind() {
-		if (ModConfig.getConfig().useWallJump) {
+		if (WallJumpConfig.getConfig().useWallJump) {
 			wallJumpKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 					"key.walljump.walljump",
 					InputUtil.Type.KEYSYM,
@@ -34,7 +34,7 @@ public class WallJumpClient implements ClientModInitializer {
 
 			));
 		}
-		if (ModConfig.getConfig().useDoubleJump) {
+		if (WallJumpConfig.getConfig().useDoubleJump) {
 			doubleJumpKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 					"key.walljump.doublejump",
 					InputUtil.Type.KEYSYM,
@@ -50,10 +50,10 @@ public class WallJumpClient implements ClientModInitializer {
 		registerBind();
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (ModConfig.getConfig().useWallJump) {
+			if (WallJumpConfig.getConfig().useWallJump) {
 				toggleWallJump = wallJumpKeybind.isPressed();
 			}
-			if (ModConfig.getConfig().useDoubleJump) {
+			if (WallJumpConfig.getConfig().useDoubleJump) {
 				toggleDoubleJump = doubleJumpKeybind.isPressed();
 			}
 		});

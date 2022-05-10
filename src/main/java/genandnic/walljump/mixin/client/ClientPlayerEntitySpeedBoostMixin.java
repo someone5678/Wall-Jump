@@ -1,7 +1,7 @@
 package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
-import genandnic.walljump.ModConfig;
+import genandnic.walljump.WallJumpConfig;
 import genandnic.walljump.WallJump;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -60,7 +60,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
 
             } else if (this.isSprinting()) {
 
-                float elytraSpeedBoost = (float) ModConfig.getConfig().elytraSpeedBoost + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
+                float elytraSpeedBoost = (float) WallJumpConfig.getConfig().elytraSpeedBoost + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
                 Vec3d boost = new Vec3d(look.getX(), look.getY() + 0.5, look.getZ()).normalize().multiply(elytraSpeedBoost);
                 if(motion.length() <= boost.length())
                     this.setVelocity(motion.add(boost.multiply(0.05)));
@@ -72,7 +72,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
 
         } else if(this.isSprinting()) {
 
-            float sprintSpeedBoost = (float) ModConfig.getConfig().sprintSpeedBoost + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
+            float sprintSpeedBoost = (float) WallJumpConfig.getConfig().sprintSpeedBoost + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
             if(!this.onGround)
                 sprintSpeedBoost /= 3.125;
 

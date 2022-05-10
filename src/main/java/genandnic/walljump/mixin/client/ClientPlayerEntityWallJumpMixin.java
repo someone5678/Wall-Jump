@@ -1,7 +1,7 @@
 package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
-import genandnic.walljump.ModConfig;
+import genandnic.walljump.WallJumpConfig;
 import genandnic.walljump.WallJump;
 import genandnic.walljump.WallJumpClient;
 import io.netty.buffer.Unpooled;
@@ -93,7 +93,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
                 this.limbDistance = 2.5F;
                 this.lastLimbDistance = 2.5F;
 
-                if (ModConfig.getConfig().autoRotation) {
+                if (WallJumpConfig.getConfig().autoRotation) {
                     this.setYaw(this.getClingDirection().getOpposite().asRotation());
                     this.prevYaw = this.getYaw();
                 }
@@ -129,14 +129,14 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
                 passedData.writeBoolean(true);
                 ClientPlayNetworking.send(WallJump.WALL_JUMP_PACKET_ID, passedData);
 
-                this.wallJump((float) ModConfig.getConfig().wallJumpHeight);
+                this.wallJump((float) WallJumpConfig.getConfig().wallJumpHeight);
                 this.staleWalls = new HashSet<>(this.walls);
             }
 
             return;
         }
 
-        if(ModConfig.getConfig().autoRotation) {
+        if(WallJumpConfig.getConfig().autoRotation) {
             this.setYaw(this.getClingDirection().getOpposite().asRotation());
             this.prevYaw = this.getYaw();
         }
@@ -154,7 +154,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
             motionY = motionY + 0.2;
             this.spawnWallParticle(this.getWallPos());
 
-        } else if(this.ticksWallClinged++ > ModConfig.getConfig().wallSlideDelay) {
+        } else if(this.ticksWallClinged++ > WallJumpConfig.getConfig().wallSlideDelay) {
 
             motionY = -0.1;
             this.spawnWallParticle(this.getWallPos());
@@ -179,7 +179,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
     private boolean canWallJump() {
 
-        if(ModConfig.getConfig().useWallJump) return true;
+        if(WallJumpConfig.getConfig().useWallJump) return true;
 
         ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
         if(!stack.isEmpty()) {
@@ -195,10 +195,15 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         if(this.isClimbing() || this.getVelocity().getY() > 0.1 || this.getHungerManager().getFoodLevel() < 1)
             return false;
 
+        if(this.isFallFlying()) {
+            if (WallJumpConfig.getConfig().enableElytraWallCling)
+                return true;
+            return false;
+        }
         if(!this.world.isSpaceEmpty(this.getBoundingBox().offset(0, -0.8, 0)))
             return false;
 
-        if(ModConfig.getConfig().allowReclinging || this.getY() < this.lastJumpY - 1)
+        if(WallJumpConfig.getConfig().allowReclinging || this.getY() < this.lastJumpY - 1)
             return true;
 
         return !this.staleWalls.containsAll(this.walls);

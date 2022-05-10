@@ -2,7 +2,7 @@ package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 import genandnic.walljump.ClientPlayerEntityWallJumpInterface;
-import genandnic.walljump.ModConfig;
+import genandnic.walljump.WallJumpConfig;
 import genandnic.walljump.WallJump;
 import genandnic.walljump.WallJumpClient;
 import io.netty.buffer.Unpooled;
@@ -101,7 +101,7 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
     private int getMultiJumps() {
 
         int jumpCount = 0;
-        if(ModConfig.getConfig().useDoubleJump)
+        if(WallJumpConfig.getConfig().useDoubleJump)
             jumpCount += 1;
 
         ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);

@@ -30,17 +30,17 @@ public class WallJump implements ModInitializer {
 	public static final Identifier FALL_DISTANCE_PACKET_ID = new Identifier("walljump", "falldistance");
 	public static final Identifier WALL_JUMP_PACKET_ID = new Identifier("walljump", "walljump");
 
-	public static ConfigHolder<ModConfig> config;
+	public static ConfigHolder<WallJumpConfig> config;
 
 	@Override
 	public void onInitialize() {
 
 		// Config Initialization
-		AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
-		config = AutoConfig.getConfigHolder(ModConfig.class);
+		AutoConfig.register(WallJumpConfig.class, JanksonConfigSerializer::new);
+		config = AutoConfig.getConfigHolder(WallJumpConfig.class);
 
 		// Enchantments
-		if (!ModConfig.getConfig().useWallJump) {
+		if (!WallJumpConfig.getConfig().useWallJump) {
 			WALLJUMP_ENCHANTMENT = Registry.register(
 					Registry.ENCHANTMENT,
 					new Identifier("walljump", "walljump"),
@@ -54,7 +54,7 @@ public class WallJump implements ModInitializer {
 			);
 		}
 
-		if (!ModConfig.getConfig().useDoubleJump) {
+		if (!WallJumpConfig.getConfig().useDoubleJump) {
 			DOUBLEJUMP_ENCHANTMENT = Registry.register(
 					Registry.ENCHANTMENT,
 					new Identifier("walljump", "doublejump"),
@@ -69,7 +69,7 @@ public class WallJump implements ModInitializer {
 		}
 
 
-		if (ModConfig.getConfig().sprintSpeedBoost == 0.0) {
+		if (WallJumpConfig.getConfig().sprintSpeedBoost == 0.0) {
 			SPEEDBOOST_ENCHANTMENT = Registry.register(
 					Registry.ENCHANTMENT,
 					new Identifier("walljump", "speedboost"),
@@ -95,7 +95,7 @@ public class WallJump implements ModInitializer {
 
 			server.execute(() -> {
 				if(didWallJump)
-					player.addExhaustion((float) ModConfig.getConfig().exhaustionWallJump);
+					player.addExhaustion((float) WallJumpConfig.getConfig().exhaustionWallJump);
 			});
 		});
 
