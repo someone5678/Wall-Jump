@@ -10,9 +10,9 @@
     "dangbroitsdon"
   ],
   "contact": {
-    "homepage": "http://minecraft.curseforge.com/projects/wall-jump",
-    "sources": "https://github.com/genandnic/Wall-Jump",
-    "issues": "https://github.com/genandnic/Wall-Jump/issues"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/wall-jump-unofficial-fabric",
+    "sources": "https://github.com/dangbroitsdon/Wall-Jump-Unofficial-Fabric",
+    "issues": "https://github.com/dangbroitsdon/Wall-Jump-Unofficial-Fabric/issues"
   },
   "license": "GPLv3",
   "icon": "assets/walljump/icon.png",
