@@ -7,6 +7,7 @@
   "enchantment.walljump.speedboost": "Speed-Boost",
   "text.autoconfig.walljump.option.allowReclinging": "Allow Reclinging",
   "text.autoconfig.walljump.option.autoRotation": "Auto Rotation",
+  "text.autoconfig.walljump.option.enableElytraWallCling": "Enable Elytra Wall Cling",
   "text.autoconfig.walljump.option.elytraSpeedBoost": "Elytra Speed Boost",
   "text.autoconfig.walljump.option.exhaustionWallJump": "Exhaustion Wall Jump",
   "text.autoconfig.walljump.option.minFallDistance": "Minimum Fall Distance",
