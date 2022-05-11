@@ -35,13 +35,19 @@ public class WallJumpClient implements ClientModInitializer {
 			));
 		}
 		if (WallJumpConfig.getConfig().useDoubleJump) {
-			doubleJumpKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+			if (!WallJumpConfig.getConfig().classicDoubleJump){
+				doubleJumpKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 					"key.walljump.doublejump",
 					InputUtil.Type.KEYSYM,
 					GLFW.GLFW_KEY_SPACE,
 					"category.walljump.walljump"
 
 			));
+			} else if (WallJumpConfig.getConfig().useDoubleJump) {
+				if (WallJumpConfig.getConfig().classicDoubleJump) {
+					doubleJumpKeybind = null;
+				}
+			}
 		}
 	}
 
@@ -54,7 +60,9 @@ public class WallJumpClient implements ClientModInitializer {
 				toggleWallJump = wallJumpKeybind.isPressed();
 			}
 			if (WallJumpConfig.getConfig().useDoubleJump) {
-				toggleDoubleJump = doubleJumpKeybind.isPressed();
+				if (!WallJumpConfig.getConfig().classicDoubleJump) {
+					toggleDoubleJump = doubleJumpKeybind.isPressed();
+				}
 			}
 		});
 

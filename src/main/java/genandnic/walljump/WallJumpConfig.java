@@ -18,6 +18,10 @@ public class WallJumpConfig implements ConfigData {
         @Comment("Automatically turn the player when wall clinging")
         public boolean autoRotation = false;
 
+        @Comment("1.16 DoubleJump which isn't Keybound.")
+        @ConfigEntry.Gui.RequiresRestart
+        public boolean classicDoubleJump = false;
+
         @Comment("Enables Elytra Wall Cling: Clinging to the Wall with Elytra Deployed.")
         @ConfigEntry.Gui.RequiresRestart
         public boolean enableElytraWallCling = false;
@@ -42,7 +46,7 @@ public class WallJumpConfig implements ConfigData {
         @Comment("Walk up steps even while airborne, also jump over fences")
         public boolean stepAssist = true;
 
-        @Comment("Allows you to jump in mid-air; will crash your game inside mod menu if you change it there.")
+        @Comment("Allows you to jump in mid-air; will crash your game inside mod menu if you change it there. DO NOT BIND TO SPACE, IF YOU WANT TO USE SPACE, SET CLASSIC DOUBLE JUMP TO TRUE")
         @ConfigEntry.Gui.RequiresRestart
         public boolean useDoubleJump = true;
 
