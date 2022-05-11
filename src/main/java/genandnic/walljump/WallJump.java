@@ -69,7 +69,7 @@ public class WallJump implements ModInitializer {
 		}
 
 
-		if (WallJumpConfig.getConfig().sprintSpeedBoost == 0.0) {
+		if (WallJumpConfig.getConfig().sprintSpeedBoost == 0.0 && WallJumpConfig.getConfig().enableSpeedBoostEnchantment) {
 			SPEEDBOOST_ENCHANTMENT = Registry.register(
 					Registry.ENCHANTMENT,
 					new Identifier("walljump", "speedboost"),

@@ -50,7 +50,6 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
     private void doDoubleJump() {
 
         Vec3d pos = this.getPos();
-        Vec3d motion = this.getVelocity();
 
         Box box = new Box(
                 pos.getX(),
@@ -69,60 +68,26 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
         ) {
 
             this.jumpCount = this.getMultiJumps();
-
-        } else if(WallJumpConfig.getConfig().classicDoubleJump && WallJumpConfig.getConfig().useDoubleJump) {
-
-            if (this.input.jumping)
-            {
-                if(!this.jumpKey
-                   && this.jumpCount > 0
-                   && motion.getY() < 0.333
-                   && this.ticksWallClinged < 1
-                   && this.getHungerManager().getFoodLevel() > 0
-           ) {
-
-               this.jump();
-               this.jumpCount--;
-
-               this.fallDistance = 0.0F;
-
-               PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
-               passedData.writeFloat(this.fallDistance);
-               ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
-           }
-
-           this.jumpKey = true;
-
-        }//else if(!WallJumpConfig.getConfig().classicDoubleJump && WallJumpConfig.getConfig().useDoubleJump) {
-        //        if (WallJumpClient.toggleDoubleJump)
-        //        {
-        //            if(!this.jumpKey
-        //                    && this.jumpCount > 0
-        //                    && motion.getY() < 0.333
-        //                    && this.ticksWallClinged < 1
-        //                    && this.getHungerManager().getFoodLevel() > 0
-        //            ) {
-        //
-        //                this.jump();
-        //                this.jumpCount--;
-        //
-        //                this.fallDistance = 0.0F;
-        //
-        //                PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
-        //                passedData.writeFloat(this.fallDistance);
-        //                ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
-        //            }
-        //
-        //            this.jumpKey = true;
-        //    }
-
-
-         else {
-
-            this.jumpKey = false;
-
         }
-    }}
+        else if(WallJumpConfig.getConfig().useDoubleJump)
+        {
+                if (!WallJumpConfig.getConfig().classicDoubleJump)
+                {
+                    if (WallJumpClient.toggleDoubleJump)
+                    {
+                        this.DoubleJump();
+                    }
+                }
+                else if (WallJumpConfig.getConfig().classicDoubleJump)
+                {
+                    if (this.input.jumping)
+                    {
+                        this.DoubleJump();
+                    }
+                }
+        }
+    }
+
 
     private int getMultiJumps() {
 
@@ -138,5 +103,30 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
         }
 
         return jumpCount;
+    }
+
+    private void DoubleJump() {
+        Vec3d motion = this.getVelocity();
+
+        if(!this.jumpKey
+                && this.jumpCount > 0
+                && motion.getY() < 0.333
+                && this.ticksWallClinged < 1
+                && this.getHungerManager().getFoodLevel() > 0
+        ) {
+
+            this.jump();
+            this.jumpCount--;
+
+            this.fallDistance = 0.0F;
+
+            PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+            passedData.writeFloat(this.fallDistance);
+            ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
+        }
+        else
+        {
+            this.jumpKey = false;
+        }
     }
 }

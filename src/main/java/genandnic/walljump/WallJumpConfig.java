@@ -43,6 +43,10 @@ public class WallJumpConfig implements ConfigData {
         @ConfigEntry.Gui.RequiresRestart
         public double sprintSpeedBoost = 0.0;
 
+        @Comment("Sprint speed boost; set to 0.0 to disable")
+        @ConfigEntry.Gui.RequiresRestart
+        public boolean enableSpeedBoostEnchantment = false;
+
         @Comment("Walk up steps even while airborne, also jump over fences")
         public boolean stepAssist = true;
 
