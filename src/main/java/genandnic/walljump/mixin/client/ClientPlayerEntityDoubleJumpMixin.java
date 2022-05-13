@@ -33,8 +33,21 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
     @Shadow public Input input;
 
     private int jumpCount = 0;
-    private boolean jumpKey = false;
 
+    private boolean jumpKey = false;
+    private boolean useDoubleJump = WallJumpConfig.getConfig().useDoubleJump;
+
+    private Vec3d pos = this.getPos();
+    private Vec3d motion = this.getVelocity();
+
+    private Box box = new Box(
+            pos.getX(),
+            pos.getY() + this.getEyeHeight(this.getPose()) * 0.8,
+            pos.getZ(),
+            pos.getX(),
+            pos.getY() + this.getHeight(),
+            pos.getZ()
+    );
 
     public ClientPlayerEntityDoubleJumpMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
@@ -48,73 +61,42 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
 
 
     private void doDoubleJump() {
+        boolean doubleJumpCountDetection = this.onGround || this.world.containsFluid(box) || this.ticksWallClinged > 0 || this.isRiding() || this.getAbilities().allowFlying;
+        boolean classicDoubleJump = WallJumpConfig.getConfig().classicDoubleJump && this.input.jumping;
+        boolean noClassicDoubleJump = !WallJumpConfig.getConfig().classicDoubleJump && WallJumpClient.toggleDoubleJump;
 
-        Vec3d pos = this.getPos();
-
-        Box box = new Box(
-                pos.getX(),
-                pos.getY() + this.getEyeHeight(this.getPose()) * 0.8,
-                pos.getZ(),
-                pos.getX(),
-                pos.getY() + this.getHeight(),
-                pos.getZ()
-        );
-
-        if(this.onGround
-                || this.world.containsFluid(box)
-                || this.ticksWallClinged > 0
-                || this.isRiding()
-                || this.getAbilities().allowFlying
-        ) {
-
+        if(doubleJumpCountDetection)
             this.jumpCount = this.getMultiJumps();
-        }
-        else if(WallJumpConfig.getConfig().useDoubleJump)
+
+        if(useDoubleJump)
         {
-                if (!WallJumpConfig.getConfig().classicDoubleJump)
-                {
-                    if (WallJumpClient.toggleDoubleJump)
-                    {
-                        this.DoubleJump();
-                    }
-                }
-                else if (WallJumpConfig.getConfig().classicDoubleJump)
-                {
-                    if (this.input.jumping)
-                    {
-                        this.DoubleJump();
-                    }
-                }
+                if (noClassicDoubleJump)
+                    this.DoubleJump();
+                else if (classicDoubleJump)
+                    this.DoubleJump();
         }
     }
 
 
     private int getMultiJumps() {
-
         int jumpCount = 0;
-        if(WallJumpConfig.getConfig().useDoubleJump)
-            jumpCount += 1;
-
         ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
-        if(!stack.isEmpty()) {
-            Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-            if(enchantments.containsKey(WallJump.DOUBLEJUMP_ENCHANTMENT))
-                jumpCount += enchantments.get(WallJump.DOUBLEJUMP_ENCHANTMENT);
-        }
+        Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
+        boolean enchantmentDetection = !stack.isEmpty() && enchantments.containsKey(WallJump.DOUBLEJUMP_ENCHANTMENT);
+
+        if(useDoubleJump)
+            jumpCount += 1;
+        if(enchantmentDetection)
+            jumpCount += enchantments.get(WallJump.DOUBLEJUMP_ENCHANTMENT);
+
 
         return jumpCount;
     }
 
     private void DoubleJump() {
-        Vec3d motion = this.getVelocity();
+        boolean doDoubleJump = !this.jumpKey && this.jumpCount > 0 && motion.getY() < 0.333 && this.ticksWallClinged < 1 && this.getHungerManager().getFoodLevel() > 0 && !this.world.containsFluid(box);
 
-        if(!this.jumpKey
-                && this.jumpCount > 0
-                && motion.getY() < 0.333
-                && this.ticksWallClinged < 1
-                && this.getHungerManager().getFoodLevel() > 0
-        ) {
-
+        if (doDoubleJump) {
             this.jump();
             this.jumpCount--;
 

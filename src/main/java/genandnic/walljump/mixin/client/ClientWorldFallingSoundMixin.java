@@ -18,10 +18,8 @@ public class ClientWorldFallingSoundMixin {
     private void addPlayerFallingSound(int id, AbstractClientPlayerEntity player, CallbackInfo ci) {
 
         if(player == MinecraftClient.getInstance().player) {
-
             WallJumpClient.FALLING_SOUND = new FallingSound(MinecraftClient.getInstance().player);
             MinecraftClient.getInstance().getSoundManager().play(WallJumpClient.FALLING_SOUND);
-
         }
     }
 }

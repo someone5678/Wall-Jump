@@ -54,15 +54,14 @@ public class WallJumpClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		registerBind();
+		boolean doubleJump = WallJumpConfig.getConfig().useDoubleJump && !WallJumpConfig.getConfig().classicDoubleJump;
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (WallJumpConfig.getConfig().useWallJump) {
 				toggleWallJump = wallJumpKeybind.isPressed();
 			}
-			if (WallJumpConfig.getConfig().useDoubleJump) {
-				if (!WallJumpConfig.getConfig().classicDoubleJump) {
-					toggleDoubleJump = doubleJumpKeybind.isPressed();
-				}
+			if (doubleJump) {
+				toggleDoubleJump = doubleJumpKeybind.isPressed();
 			}
 		});
 
