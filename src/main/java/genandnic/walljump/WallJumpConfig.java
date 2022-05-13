@@ -18,10 +18,6 @@ public class WallJumpConfig implements ConfigData {
         @Comment("Automatically turn the player when wall clinging")
         public boolean autoRotation = false;
 
-        @Comment("1.16 DoubleJump which isn't Keybound.")
-        @ConfigEntry.Gui.RequiresRestart
-        public boolean classicDoubleJump = false;
-
         @Comment("Enables Elytra Wall Cling: Clinging to the Wall with Elytra Deployed.")
         @ConfigEntry.Gui.RequiresRestart
         public boolean enableElytraWallCling = false;

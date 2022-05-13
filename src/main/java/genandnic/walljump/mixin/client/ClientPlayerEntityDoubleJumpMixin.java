@@ -35,80 +35,76 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
     private int jumpCount = 0;
 
     private boolean jumpKey = false;
-    private boolean useDoubleJump = WallJumpConfig.getConfig().useDoubleJump;
-
-    private Vec3d pos = this.getPos();
-    private Vec3d motion = this.getVelocity();
-
-    private Box box = new Box(
-            pos.getX(),
-            pos.getY() + this.getEyeHeight(this.getPose()) * 0.8,
-            pos.getZ(),
-            pos.getX(),
-            pos.getY() + this.getHeight(),
-            pos.getZ()
-    );
 
     public ClientPlayerEntityDoubleJumpMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
     }
-
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
     private void doubleJumpTickMovement(CallbackInfo ci) {
         this.doDoubleJump();
     }
 
-
     private void doDoubleJump() {
-        boolean doubleJumpCountDetection = this.onGround || this.world.containsFluid(box) || this.ticksWallClinged > 0 || this.isRiding() || this.getAbilities().allowFlying;
-        boolean classicDoubleJump = WallJumpConfig.getConfig().classicDoubleJump && this.input.jumping;
-        boolean noClassicDoubleJump = !WallJumpConfig.getConfig().classicDoubleJump && WallJumpClient.toggleDoubleJump;
 
-        if(doubleJumpCountDetection)
+        Vec3d pos = this.getPos();
+        Vec3d motion = this.getVelocity();
+
+        Box box = new Box(
+                pos.getX(),
+                pos.getY() + this.getEyeHeight(this.getPose()) * 0.8,
+                pos.getZ(),
+                pos.getX(),
+                pos.getY() + this.getHeight(),
+                pos.getZ()
+        );
+
+        if(this.onGround
+                || this.world.containsFluid(box)
+                || this.ticksWallClinged > 0
+                || this.isRiding()
+                || this.getAbilities().allowFlying
+        ) {
             this.jumpCount = this.getMultiJumps();
-
-        if(useDoubleJump)
-        {
-                if (noClassicDoubleJump)
-                    this.DoubleJump();
-                else if (classicDoubleJump)
-                    this.DoubleJump();
         }
+
+        else if(this.input.jumping)
+        {
+            if (!this.jumpKey
+                    && this.jumpCount > 0
+                    && motion.getY() < 0.333
+                    && this.ticksWallClinged < 1
+                    && this.getHungerManager().getFoodLevel() > 0
+            ){
+                this.jump();
+                this.jumpCount--;
+
+                this.fallDistance = 0.0F;
+
+                PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
+                passedData.writeFloat(this.fallDistance);
+                ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
+            }
+            this.jumpKey = true;
+            }
+            else
+            {
+                this.jumpKey = false;
+            }
     }
 
 
     private int getMultiJumps() {
         int jumpCount = 0;
-        ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
-        Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-        boolean enchantmentDetection = !stack.isEmpty() && enchantments.containsKey(WallJump.DOUBLEJUMP_ENCHANTMENT);
-
-        if(useDoubleJump)
+        if(WallJumpConfig.getConfig().useDoubleJump)
             jumpCount += 1;
-        if(enchantmentDetection)
-            jumpCount += enchantments.get(WallJump.DOUBLEJUMP_ENCHANTMENT);
 
-
+        ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
+        if(!stack.isEmpty()) {
+            Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
+            if(enchantments.containsKey(WallJump.DOUBLEJUMP_ENCHANTMENT))
+                jumpCount += enchantments.get(WallJump.DOUBLEJUMP_ENCHANTMENT);
+        }
         return jumpCount;
-    }
-
-    private void DoubleJump() {
-        boolean doDoubleJump = !this.jumpKey && this.jumpCount > 0 && motion.getY() < 0.333 && this.ticksWallClinged < 1 && this.getHungerManager().getFoodLevel() > 0 && !this.world.containsFluid(box);
-
-        if (doDoubleJump) {
-            this.jump();
-            this.jumpCount--;
-
-            this.fallDistance = 0.0F;
-
-            PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
-            passedData.writeFloat(this.fallDistance);
-            ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
-        }
-        else
-        {
-            this.jumpKey = false;
-        }
     }
 }

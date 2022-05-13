@@ -16,11 +16,9 @@ import org.lwjgl.glfw.GLFW;
 public class WallJumpClient implements ClientModInitializer {
 	public static final Logger LOGGER = LogManager.getLogger("WallJumpClient");
 
-	public static boolean toggleDoubleJump;
 	public static boolean toggleWallJump;
 
 	private static KeyBinding wallJumpKeybind;
-	private static KeyBinding doubleJumpKeybind;
 
 	public static FallingSound FALLING_SOUND;
 
@@ -34,34 +32,15 @@ public class WallJumpClient implements ClientModInitializer {
 
 			));
 		}
-		if (WallJumpConfig.getConfig().useDoubleJump) {
-			if (!WallJumpConfig.getConfig().classicDoubleJump){
-				doubleJumpKeybind = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-					"key.walljump.doublejump",
-					InputUtil.Type.KEYSYM,
-					GLFW.GLFW_KEY_SPACE,
-					"category.walljump.walljump"
-
-			));
-			} else if (WallJumpConfig.getConfig().useDoubleJump) {
-				if (WallJumpConfig.getConfig().classicDoubleJump) {
-					doubleJumpKeybind = null;
-				}
-			}
-		}
 	}
 
 	@Override
 	public void onInitializeClient() {
 		registerBind();
-		boolean doubleJump = WallJumpConfig.getConfig().useDoubleJump && !WallJumpConfig.getConfig().classicDoubleJump;
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (WallJumpConfig.getConfig().useWallJump) {
 				toggleWallJump = wallJumpKeybind.isPressed();
-			}
-			if (doubleJump) {
-				toggleDoubleJump = doubleJumpKeybind.isPressed();
 			}
 		});
 
