@@ -2,7 +2,7 @@ package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 import genandnic.walljump.WallJumpConfig;
-import genandnic.walljump.WallJump;
+import genandnic.walljump.registry.WallJumpEnchantmentRegistry;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
@@ -86,8 +86,8 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
         ItemStack stack = this.getEquippedStack(slot);
         if (!stack.isEmpty()) {
             Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-            if (enchantments.containsKey(WallJump.SPEEDBOOST_ENCHANTMENT))
-                return enchantments.get(WallJump.SPEEDBOOST_ENCHANTMENT);
+            if (enchantments.containsKey(WallJumpEnchantmentRegistry.SPEEDBOOST_ENCHANTMENT))
+                return enchantments.get(WallJumpEnchantmentRegistry.SPEEDBOOST_ENCHANTMENT);
         }
 
         return 0;

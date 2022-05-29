@@ -1,6 +1,5 @@
 package genandnic.walljump.enchantment;
 
-import genandnic.walljump.WallJump;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.enchantment.ProtectionEnchantment;

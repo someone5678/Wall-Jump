@@ -1,10 +1,8 @@
 package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
-import genandnic.walljump.ClientPlayerEntityWallJumpInterface;
-import genandnic.walljump.WallJumpConfig;
-import genandnic.walljump.WallJump;
-import genandnic.walljump.WallJumpClient;
+import genandnic.walljump.*;
+import genandnic.walljump.registry.WallJumpEnchantmentRegistry;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.input.Input;
@@ -83,7 +81,7 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
 
                 PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
                 passedData.writeFloat(this.fallDistance);
-                ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
+                ClientPlayNetworking.send(Constants.FALL_DISTANCE_PACKET_ID, passedData);
             }
             this.jumpKey = true;
             }
@@ -102,8 +100,8 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
         ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
         if(!stack.isEmpty()) {
             Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-            if(enchantments.containsKey(WallJump.DOUBLEJUMP_ENCHANTMENT))
-                jumpCount += enchantments.get(WallJump.DOUBLEJUMP_ENCHANTMENT);
+            if(enchantments.containsKey(WallJumpEnchantmentRegistry.DOUBLEJUMP_ENCHANTMENT))
+                jumpCount += enchantments.get(WallJumpEnchantmentRegistry.DOUBLEJUMP_ENCHANTMENT);
         }
         return jumpCount;
     }

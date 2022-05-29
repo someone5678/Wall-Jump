@@ -1,9 +1,9 @@
 package genandnic.walljump.mixin.client;
 
 import com.mojang.authlib.GameProfile;
-import genandnic.walljump.WallJumpConfig;
-import genandnic.walljump.WallJump;
-import genandnic.walljump.WallJumpClient;
+import genandnic.walljump.*;
+import genandnic.walljump.registry.WallJumpEnchantmentRegistry;
+import genandnic.walljump.registry.WallJumpKeyBindingRegistry;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.BlockRenderType;
@@ -36,11 +36,11 @@ import java.util.Set;
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlayerEntity {
 
+    @Shadow public Input input;
+
     @Shadow public abstract boolean isRiding();
 
     @Shadow public abstract float getYaw(float tickDelta);
-
-    @Shadow public Input input;
 
     public int ticksWallClinged;
     private int ticksKeyDown;
@@ -49,7 +49,6 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
     private double lastJumpY = Double.MAX_VALUE;
     private Set<Direction> walls = new HashSet<>();
     private Set<Direction> staleWalls = new HashSet<>();
-
 
     public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
@@ -64,6 +63,12 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
     private void doWallJump() {
         if(!this.canWallJump()) return;
+
+        if(WallJumpConfig.getConfig().classicWallJump) {
+            this.ticksKeyDown = input.sneaking ? this.ticksKeyDown + 1 : 0;
+        } else if (!WallJumpConfig.getConfig().classicWallJump) {
+            this.ticksKeyDown = WallJumpKeyBindingRegistry.toggleWallJump ? this.ticksKeyDown + 1 : 0;
+        }
 
         if(this.onGround
                 || this.getAbilities().flying
@@ -80,7 +85,6 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         }
 
         this.updateWalls();
-        this.ticksKeyDown = WallJumpClient.toggleWallJump ? this.ticksKeyDown + 1 : 0;
 
         if(this.ticksWallClinged < 1) {
 
@@ -109,7 +113,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
             return;
         }
 
-        if(!WallJumpClient.toggleWallJump
+        if(this.getClassicWallJump()
                 || this.onGround
                 || !this.world.getFluidState(this.getBlockPos()).isEmpty()
                 || this.walls.isEmpty()
@@ -127,7 +131,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
                 PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
                 passedData.writeBoolean(true);
-                ClientPlayNetworking.send(WallJump.WALL_JUMP_PACKET_ID, passedData);
+                ClientPlayNetworking.send(Constants.WALL_JUMP_PACKET_ID, passedData);
 
                 this.wallJump((float) WallJumpConfig.getConfig().wallJumpHeight);
                 this.staleWalls = new HashSet<>(this.walls);
@@ -170,7 +174,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
             PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
             passedData.writeFloat((float) (motionY * motionY * 8));
-            ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
+            ClientPlayNetworking.send(Constants.FALL_DISTANCE_PACKET_ID, passedData);
         }
 
         this.setVelocity(0.0, motionY, 0.0);
@@ -184,7 +188,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
         if(!stack.isEmpty()) {
             Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-            return enchantments.containsKey(WallJump.WALLJUMP_ENCHANTMENT);
+            return enchantments.containsKey(WallJumpEnchantmentRegistry.WALLJUMP_ENCHANTMENT);
         }
 
         return false;
@@ -196,10 +200,9 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
             return false;
 
         if(this.isFallFlying()) {
-            if (WallJumpConfig.getConfig().enableElytraWallCling)
-                return true;
-            return false;
+            return WallJumpConfig.getConfig().enableElytraWallCling;
         }
+
         if(!this.world.isSpaceEmpty(this.getBoundingBox().offset(0, -0.8, 0)))
             return false;
 
@@ -320,5 +323,9 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
                     motion.getZ() * -1.0D
             );
         }
+    }
+
+    private boolean getClassicWallJump() {
+        return WallJumpConfig.getConfig().classicWallJump ? !input.sneaking : !WallJumpKeyBindingRegistry.toggleWallJump;
     }
 }
