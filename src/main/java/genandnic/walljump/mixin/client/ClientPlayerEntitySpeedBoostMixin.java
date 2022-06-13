@@ -12,8 +12,10 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,8 +30,8 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
     @Shadow
     public abstract boolean isSneaking();
 
-    public ClientPlayerEntitySpeedBoostMixin(ClientWorld world, GameProfile profile) {
-        super(world, profile);
+    public ClientPlayerEntitySpeedBoostMixin(ClientWorld world, GameProfile profile, @Nullable PlayerPublicKey publickey) {
+        super(world, profile, publickey);
     }
 
     @Inject(method = "tickMovement", at = @At("TAIL"))

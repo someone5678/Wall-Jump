@@ -21,8 +21,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.*;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,8 +52,8 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
     private Set<Direction> walls = new HashSet<>();
     private Set<Direction> staleWalls = new HashSet<>();
 
-    public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile) {
-        super(world, profile);
+    public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile, @Nullable PlayerPublicKey publickey) {
+        super(world, profile, publickey);
     }
 
 

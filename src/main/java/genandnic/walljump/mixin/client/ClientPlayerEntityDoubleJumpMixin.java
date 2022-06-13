@@ -13,8 +13,10 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.*;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,8 +36,8 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
 
     private boolean jumpKey = false;
 
-    public ClientPlayerEntityDoubleJumpMixin(ClientWorld world, GameProfile profile) {
-        super(world, profile);
+    public ClientPlayerEntityDoubleJumpMixin(ClientWorld world, GameProfile profile, @Nullable PlayerPublicKey publickey) {
+        super(world, profile, publickey);
     }
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
