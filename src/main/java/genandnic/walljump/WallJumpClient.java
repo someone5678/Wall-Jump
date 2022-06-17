@@ -4,6 +4,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.math.random.Random;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +17,7 @@ public class WallJumpClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 
-		FALLING_SOUND = new FallingSound(MinecraftClient.getInstance().player);
+		FALLING_SOUND = new FallingSound(MinecraftClient.getInstance().player, Random.create());
 
 		LOGGER.info("[Wall Jump Client] initialized!");
 	}

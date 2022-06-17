@@ -5,6 +5,7 @@ import genandnic.walljump.WallJumpClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,7 +20,7 @@ public class ClientWorldFallingSoundMixin {
 
         if(player == MinecraftClient.getInstance().player) {
 
-            WallJumpClient.FALLING_SOUND = new FallingSound(MinecraftClient.getInstance().player);
+            WallJumpClient.FALLING_SOUND = new FallingSound(MinecraftClient.getInstance().player, Random.create());
             MinecraftClient.getInstance().getSoundManager().play(WallJumpClient.FALLING_SOUND);
 
         }

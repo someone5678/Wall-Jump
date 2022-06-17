@@ -20,6 +20,7 @@ import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.encryption.PlayerPublicKey;
 import net.minecraft.util.math.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,8 +53,8 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         return this.world.isSpaceEmpty(this, box) && !this.world.containsFluid(box);
     }
 
-    public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile) {
-        super(world, profile);
+    public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
+        super(world, profile, playerPublicKey);
     }
 
 

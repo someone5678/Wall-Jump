@@ -7,6 +7,7 @@ import net.minecraft.client.sound.MovingSoundInstance;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.random.Random;
 
 
 @Environment(EnvType.CLIENT)
@@ -14,8 +15,8 @@ public class FallingSound extends MovingSoundInstance {
 
     private final ClientPlayerEntity player;
 
-    public FallingSound(ClientPlayerEntity player) {
-        super(SoundEvents.ITEM_ELYTRA_FLYING, SoundCategory.PLAYERS);
+    public FallingSound(ClientPlayerEntity player, Random random) {
+        super(SoundEvents.ITEM_ELYTRA_FLYING, SoundCategory.PLAYERS, random);
         this.player = player;
         this.repeat = true;
         this.repeatDelay = 0;
