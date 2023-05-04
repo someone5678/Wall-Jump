@@ -21,7 +21,7 @@ import genandnic.walljump.WallJumpClient;
 public class ClientPlayerEntityMiscellaneousMixin extends AbstractClientPlayerEntity {
 
     public ClientPlayerEntityMiscellaneousMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile, playerPublicKey);
+        super(world, profile);
     }
 
     private boolean doesNotCollide(Box box) {
@@ -37,7 +37,7 @@ public class ClientPlayerEntityMiscellaneousMixin extends AbstractClientPlayerEn
                 && this.getVelocity().getY() < 0.01
         ) {
 
-            if(this.doesNotCollide(this.getBoundingBox().expand(0.01, -this.stepHeight + 0.02, 0.01))) {
+            if(this.doesNotCollide(this.getBoundingBox().expand(0.01, -this.getStepHeight() + 0.02, 0.01))) {
                 this.onGround = true;
 
             }

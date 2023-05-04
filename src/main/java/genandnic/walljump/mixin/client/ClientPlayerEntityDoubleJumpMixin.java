@@ -36,7 +36,7 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
 
 
     public ClientPlayerEntityDoubleJumpMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile, playerPublicKey);
+        super(world, profile);
     }
 
 
@@ -46,7 +46,8 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
     }
 
 
-    private void doDoubleJump() {
+    @SuppressWarnings("static-access")
+	private void doDoubleJump() {
 
         Vec3d pos = this.getPos();
         Vec3d motion = this.getVelocity();

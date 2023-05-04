@@ -54,7 +54,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
     }
 
     public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile, playerPublicKey);
+        super(world, profile);
     }
 
 
@@ -92,8 +92,8 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
                     && this.canWallCling()
             ) {
 
-                this.limbDistance = 2.5F;
-                this.lastLimbDistance = 2.5F;
+                this.limbAnimator.getSpeed(2.5F);
+                this.limbAnimator.prevSpeed = 2.5F;
 
                 if (WallJump.CONFIGURATION.autoRotation()) {
                     this.setYaw(this.getClingDirection().getOpposite().asRotation());

@@ -1,5 +1,15 @@
 package genandnic.walljump;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.aeonbits.owner.ConfigFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import genandnic.walljump.enchantment.DoubleJumpEnchantment;
 import genandnic.walljump.enchantment.SpeedBoostEnchantment;
 import genandnic.walljump.enchantment.WallJumpEnchantment;
@@ -9,17 +19,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentTarget;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import org.aeonbits.owner.ConfigFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
 
 
 public class WallJump implements ModInitializer {
@@ -67,7 +69,7 @@ public class WallJump implements ModInitializer {
 
 		// Enchantments
 		WALLJUMP_ENCHANTMENT = Registry.register(
-				Registry.ENCHANTMENT,
+				Registries.ENCHANTMENT,
 				new Identifier("walljump", "walljump"),
 				new WallJumpEnchantment(
 						Enchantment.Rarity.UNCOMMON,
@@ -79,7 +81,7 @@ public class WallJump implements ModInitializer {
 		);
 
 		DOUBLEJUMP_ENCHANTMENT = Registry.register(
-				Registry.ENCHANTMENT,
+				Registries.ENCHANTMENT,
 				new Identifier("walljump", "doublejump"),
 				new DoubleJumpEnchantment(
 						Enchantment.Rarity.RARE,
@@ -91,7 +93,7 @@ public class WallJump implements ModInitializer {
 		);
 
 		SPEEDBOOST_ENCHANTMENT = Registry.register(
-				Registry.ENCHANTMENT,
+				Registries.ENCHANTMENT,
 				new Identifier("walljump", "speedboost"),
 				new SpeedBoostEnchantment(
 						Enchantment.Rarity.RARE,

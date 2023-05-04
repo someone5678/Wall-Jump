@@ -29,7 +29,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
     public abstract boolean isSneaking();
 
     public ClientPlayerEntitySpeedBoostMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile, playerPublicKey);
+        super(world, profile);
     }
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
