@@ -7,3 +7,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+rootProject.name = 'wall-jumped-1.20'
