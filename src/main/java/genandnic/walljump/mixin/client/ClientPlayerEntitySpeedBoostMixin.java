@@ -65,14 +65,14 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
                     this.setVelocity(motion.add(boost.multiply(0.05)));
 
                 if(boost.length() > 0.5)
-                    this.world.addParticle(ParticleTypes.FIREWORK, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
+                    this.getWorld().addParticle(ParticleTypes.FIREWORK, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
 
             }
 
         } else if(this.isSprinting()) {
 
             float sprintSpeedBoost = (float) WallJump.CONFIGURATION.sprintSpeedBoost() + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
-            if(!this.onGround)
+            if(!this.isOnGround())
                 sprintSpeedBoost /= 3.125;
 
             Vec3d boost = new Vec3d(look.getX(), 0.0, look.getZ()).multiply(sprintSpeedBoost * 0.125F);

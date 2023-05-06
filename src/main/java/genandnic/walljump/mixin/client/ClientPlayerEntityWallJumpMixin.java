@@ -50,7 +50,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
     private Set<Direction> staleWalls = new HashSet<>();
 
     private boolean doesNotCollide(Box box) {
-        return this.world.isSpaceEmpty(this, box) && !this.world.containsFluid(box);
+        return this.getWorld().isSpaceEmpty(this, box) && !this.getWorld().containsFluid(box);
     }
 
     public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
@@ -67,9 +67,9 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
         if(!this.canWallJump()) return;
 
-        if(this.onGround
+        if(this.isOnGround()
                 || this.getAbilities().flying
-                || !this.world.getFluidState(this.getBlockPos()).isEmpty()
+                || !this.getWorld().getFluidState(this.getBlockPos()).isEmpty()
                 || this.isRiding()
         ) {
             this.ticksWallClinged = 0;
@@ -112,8 +112,8 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
         }
 
         if(!input.sneaking
-                || this.onGround
-                || !this.world.getFluidState(this.getBlockPos()).isEmpty()
+                || this.isOnGround()
+                || !this.getWorld().getFluidState(this.getBlockPos()).isEmpty()
                 || this.walls.isEmpty()
                 || this.getHungerManager().getFoodLevel() < 1
         ) {
@@ -121,7 +121,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
             this.ticksWallClinged = 0;
 
             if((this.forwardSpeed != 0 || this.sidewaysSpeed != 0)
-                    && !this.onGround
+                    && !this.isOnGround()
                     && !this.walls.isEmpty()
             ) {
 
@@ -251,7 +251,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
     private BlockPos getWallPos() {
 
         BlockPos clingPos = this.getBlockPos().offset(this.getClingDirection());
-        return this.world.getBlockState(clingPos).getMaterial().isSolid() ? clingPos : clingPos.offset(Direction.UP);
+        return this.getWorld().getBlockState(clingPos).isSolid() ? clingPos : clingPos.offset(Direction.UP);
     }
 
 
@@ -286,7 +286,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
     private void playHitSound(BlockPos blockPos) {
 
-        BlockState blockState = this.world.getBlockState(blockPos);
+        BlockState blockState = this.getWorld().getBlockState(blockPos);
         BlockSoundGroup soundType = blockState.getBlock().getSoundGroup(blockState);
         this.playSound(soundType.getHitSound(), soundType.getVolume() * 0.25F, soundType.getPitch());
     }
@@ -294,7 +294,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
     private void playBreakSound(BlockPos blockPos) {
 
-        BlockState blockState = this.world.getBlockState(blockPos);
+        BlockState blockState = this.getWorld().getBlockState(blockPos);
         BlockSoundGroup soundType = blockState.getBlock().getSoundGroup(blockState);
         this.playSound(soundType.getFallSound(), soundType.getVolume() * 0.5F, soundType.getPitch());
     }
@@ -302,12 +302,12 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 
     private void spawnWallParticle(BlockPos blockPos) {
 
-        BlockState blockState = this.world.getBlockState(blockPos);
+        BlockState blockState = this.getWorld().getBlockState(blockPos);
         if(blockState.getRenderType() != BlockRenderType.INVISIBLE) {
 
             Vec3d pos = this.getPos();
             Vec3i motion = this.getClingDirection().getVector();
-            this.world.addParticle(
+            this.getWorld().addParticle(
                     new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState),
                     pos.getX(),
                     pos.getY(),

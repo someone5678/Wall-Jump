@@ -61,8 +61,8 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
                 pos.getZ()
         );
 
-        if(this.onGround
-                || this.world.containsFluid(box)
+        if(this.isOnGround()
+                || this.getWorld().containsFluid(box)
                 || this.ticksWallClinged > 0
                 || this.isRiding()
                 || this.getAbilities().allowFlying

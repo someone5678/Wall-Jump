@@ -25,7 +25,7 @@ public class ClientPlayerEntityMiscellaneousMixin extends AbstractClientPlayerEn
     }
 
     private boolean doesNotCollide(Box box) {
-        return this.world.isSpaceEmpty(this, box) && !this.world.containsFluid(box);
+        return this.getWorld().isSpaceEmpty(this, box) && !this.getWorld().containsFluid(box);
     }
 
     @Inject(method = "tickMovement", at = @At("TAIL"))
@@ -38,7 +38,7 @@ public class ClientPlayerEntityMiscellaneousMixin extends AbstractClientPlayerEn
         ) {
 
             if(this.doesNotCollide(this.getBoundingBox().expand(0.01, -this.getStepHeight() + 0.02, 0.01))) {
-                this.onGround = true;
+                this.setOnGround(true);
 
             }
         }
