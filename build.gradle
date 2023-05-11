@@ -1,7 +1,16 @@
+buildscript {
+    repositories {
+    	maven { url  = 'https://plugins.gradle.org/m2/' }
+    }
+}
+
 plugins {
     id 'fabric-loom' version '1.1-SNAPSHOT'
     id 'maven-publish'
+    id 'com.matthewprenger.cursegradle' version '1.4.0'
+    id "com.modrinth.minotaur" version "2.+"
 }
+import com.modrinth.minotaur.dependencies.ModDependency
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -70,5 +79,59 @@ publishing {
 
 	repositories {
 		// mavenLocal()
+	}
+}
+
+if (file('key.properties').exists()) {
+    curseforge {
+
+    def curseProp = new Properties()
+    File secretPropsFile = file("key.properties")
+    curseProp.load(secretPropsFile.newInputStream())
+
+    project {
+        apiKey = curseProp.getProperty('curseKey')
+        id = "858060"
+        releaseType = "release"
+        changelogType = 'text'
+        changelog = file('changelog.txt')
+		addGameVersion("1.20-Snapshot")
+        addGameVersion("Fabric")
+        addGameVersion("Java 17")
+
+        relations {
+            requiredDependency 'fabric-api'      
+        }
+        mainArtifact(remapJar)
+
+        afterEvaluate {
+            uploadTask.dependsOn("remapJar")
+        }
+    }
+    options {
+    	//debug = true
+        forgeGradleIntegration = false
+    }
+   }
+}
+
+if (file('key.properties').exists()) {
+	modrinth {
+		def modrinthProp = new Properties()
+		File secretPropsFile = file("key.properties")
+		modrinthProp.load(secretPropsFile.newInputStream())
+		
+		token = modrinthProp.getProperty('modrinthKey')
+		projectId = 'ulUgV6dN' 
+		versionNumber = project.mod_version 
+		versionName = 'Fabric 1.20-pre1'
+		uploadFile = remapJar 
+		changelog = rootProject.file("changelog.txt").text
+		gameVersions = ['1.20-pre1']
+		versionType = "beta"
+		loaders = ['fabric']
+		dependencies { 
+        	required.project "fabric-api"
+   		}
 	}
 }

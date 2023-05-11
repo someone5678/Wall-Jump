@@ -2,7 +2,7 @@
 	"schemaVersion": 1,
 	"id": "walljump",
 	"version": "${version}",
-	"name": "Wall Jump!",
+	"name": "Wall Jump",
 	"description": "Jump from wall to wall!",
 	"authors": [
 		"Genandnic",
