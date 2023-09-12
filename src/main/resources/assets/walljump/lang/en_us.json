@@ -1,6 +1,19 @@
 {
-  "key.walljump.walljump": "Wall Jump / Wall Cling",
   "enchantment.walljump.walljump": "Wall-Jump!",
   "enchantment.walljump.doublejump": "Double-Jump",
-  "enchantment.walljump.speedboost": "Speed-Boost"
+  "enchantment.walljump.speedboost": "Speed-Boost",
+  "config.screen.walljump": "Wall Jumped Config",
+  "config.walljump.option.allowReClinging": "Allow Recling",
+  "config.walljump.option.autoRotation": "Auto Rotate",
+  "config.walljump.option.elytraSpeedBoost": "Eltry Speed Boost",
+  "config.walljump.option.enableEnchantments": "Enable Enchantments",
+  "config.walljump.option.exhaustionWallJump": "Wall Jumping Exhaustion",
+  "config.walljump.option.minFallDistance": "Min Fall Distance",
+  "config.walljump.option.playFallSound": "Play Fall Sound",
+  "config.walljump.option.sprintSpeedBoost": "Spirt Speed Boost",
+  "config.walljump.option.stepAssist": "Step Assist",
+  "config.walljump.option.useDoubleJump": "Use Double Jump",
+  "config.walljump.option.useWallJump": "Use Wall Jump",
+  "config.walljump.option.wallJumpHeight": "Wall Jump Height",
+  "config.walljump.option.wallSlideDelay": "Wall Slide Tick Delay"
 }
