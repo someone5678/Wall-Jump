@@ -1,94 +1,80 @@
 package genandnic.walljump.mixin.client;
 
-import com.mojang.authlib.GameProfile;
-import genandnic.walljump.WallJump;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Map;
+import com.mojang.authlib.GameProfile;
 
-@Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPlayerEntity {
+import genandnic.walljump.WallJump;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.phys.Vec3;
 
-    @Shadow
-    public abstract boolean isSneaking();
+@Mixin(LocalPlayer.class)
+public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPlayer {
 
-    public ClientPlayerEntitySpeedBoostMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile);
-    }
+	@Shadow
+	public abstract boolean isShiftKeyDown();
 
-    @Inject(method = "tickMovement", at = @At("TAIL"))
-    private void miscellaneousTickMovement(CallbackInfo ci) {
-        this.doSpeedBoost();
-    }
+	public ClientPlayerEntitySpeedBoostMixin(ClientLevel world, GameProfile profile, ProfilePublicKey playerPublicKey) {
+		super(world, profile);
+	}
 
-    private void doSpeedBoost() {
+	@Inject(method = "aiStep", at = @At("TAIL"))
+	private void miscellaneousTickMovement(CallbackInfo ci) {
+		this.doSpeedBoost();
+	}
 
-        StatusEffectInstance jumpBoostEffect = ((ClientPlayerEntity)(Object) this).getStatusEffect(StatusEffects.JUMP_BOOST);
+	private void doSpeedBoost() {
+		var jumpBoostEffect = ((LocalPlayer) (Object) this).getEffect(MobEffects.JUMP);
+		var jumpBoostLevel = 0;
+		if (jumpBoostEffect != null)
+			jumpBoostLevel = jumpBoostEffect.getAmplifier() + 1;
 
-        int jumpBoostLevel = 0;
-        if(jumpBoostEffect != null)
-            jumpBoostLevel = jumpBoostEffect.getAmplifier() + 1;
+		this.getAbilities().setFlyingSpeed((float) (this.getSpeed() * (this.isSprinting() ? 1 : 1.3) / 5) * (jumpBoostLevel * 0.5F + 1));
 
-        this.getAbilities().setFlySpeed((float) (this.getMovementSpeed() * (this.isSprinting() ? 1 : 1.3) / 5) * (jumpBoostLevel * 0.5F + 1));
+		var pos = this.position();
+		var look = this.getLookAngle();
+		var motion = this.getDeltaMovement();
 
-        Vec3d pos = this.getPos();
-        Vec3d look = this.getRotationVector();
-        Vec3d motion = this.getVelocity();
+		if (this.isFallFlying()) {
+			if (this.isShiftKeyDown())
+				if (this.getXRot() < 30F)
+					this.setDeltaMovement(motion.subtract(motion.scale(0.05)));
+				else if (this.isSprinting()) {
+					var elytraSpeedBoost = (float) WallJump.CONFIGURATION.elytraSpeedBoost + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
+					var boost = new Vec3(look.x(), look.y() + 0.5, look.z()).normalize().scale(elytraSpeedBoost);
+					if (motion.length() <= boost.length())
+						this.setDeltaMovement(motion.add(boost.scale(0.05)));
+					if (boost.length() > 0.5)
+						this.level().addParticle(ParticleTypes.FIREWORK, pos.x(), pos.y(), pos.z(), 0, 0, 0);
+				}
 
-        if (this.isFallFlying()) {
+		} else if (this.isSprinting()) {
+			var sprintSpeedBoost = (float) WallJump.CONFIGURATION.sprintSpeedBoost + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
+			if (!this.onGround())
+				sprintSpeedBoost /= 3.125;
+			var boost = new Vec3(look.x(), 0.0, look.z()).scale(sprintSpeedBoost * 0.125F);
+			this.setDeltaMovement(motion.add(boost));
+		}
+	}
 
-            if (this.isSneaking()) {
-                if (this.getPitch() < 30F)
-                    this.setVelocity(motion.subtract(motion.multiply(0.05)));
-
-            } else if (this.isSprinting()) {
-
-                float elytraSpeedBoost = (float) WallJump.CONFIGURATION.elytraSpeedBoost() + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
-                Vec3d boost = new Vec3d(look.getX(), look.getY() + 0.5, look.getZ()).normalize().multiply(elytraSpeedBoost);
-                if(motion.length() <= boost.length())
-                    this.setVelocity(motion.add(boost.multiply(0.05)));
-
-                if(boost.length() > 0.5)
-                    this.getWorld().addParticle(ParticleTypes.FIREWORK, pos.getX(), pos.getY(), pos.getZ(), 0, 0, 0);
-
-            }
-
-        } else if(this.isSprinting()) {
-
-            float sprintSpeedBoost = (float) WallJump.CONFIGURATION.sprintSpeedBoost() + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
-            if(!this.isOnGround())
-                sprintSpeedBoost /= 3.125;
-
-            Vec3d boost = new Vec3d(look.getX(), 0.0, look.getZ()).multiply(sprintSpeedBoost * 0.125F);
-            this.setVelocity(motion.add(boost));
-        }
-    }
-
-    private int getEquipmentBoost(EquipmentSlot slot) {
-
-        ItemStack stack = this.getEquippedStack(slot);
-        if (!stack.isEmpty()) {
-            Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-            if (enchantments.containsKey(WallJump.SPEEDBOOST_ENCHANTMENT))
-                return enchantments.get(WallJump.SPEEDBOOST_ENCHANTMENT);
-        }
-
-        return 0;
-    }
+	private int getEquipmentBoost(EquipmentSlot slot) {
+		var stack = this.getItemBySlot(slot);
+		if (!stack.isEmpty()) {
+			var enchantments = EnchantmentHelper.getEnchantments(stack);
+			if (enchantments.containsKey(WallJump.SPEEDBOOST_ENCHANTMENT))
+				return enchantments.get(WallJump.SPEEDBOOST_ENCHANTMENT);
+		}
+		return 0;
+	}
 }

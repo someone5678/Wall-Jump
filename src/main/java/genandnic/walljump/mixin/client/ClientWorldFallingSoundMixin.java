@@ -1,28 +1,25 @@
 package genandnic.walljump.mixin.client;
 
-import genandnic.walljump.FallingSound;
-import genandnic.walljump.WallJumpClient;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import genandnic.walljump.FallingSound;
+import genandnic.walljump.WallJumpClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.util.RandomSource;
 
-@Mixin(ClientWorld.class)
+@Mixin(ClientLevel.class)
 public class ClientWorldFallingSoundMixin {
 
-    @Inject(method = "addPlayer", at = @At(value = "TAIL"))
-    private void addPlayerFallingSound(int id, AbstractClientPlayerEntity player, CallbackInfo ci) {
-
-        if(player == MinecraftClient.getInstance().player) {
-
-            WallJumpClient.FALLING_SOUND = new FallingSound(MinecraftClient.getInstance().player, Random.create());
-            MinecraftClient.getInstance().getSoundManager().play(WallJumpClient.FALLING_SOUND);
-
-        }
-    }
+	@Inject(method = "addPlayer", at = @At(value = "TAIL"))
+	private void addPlayerFallingSound(int id, AbstractClientPlayer player, CallbackInfo ci) {
+		if (player == Minecraft.getInstance().player) {
+			WallJumpClient.FALLING_SOUND = new FallingSound(Minecraft.getInstance().player, RandomSource.create());
+			Minecraft.getInstance().getSoundManager().play(WallJumpClient.FALLING_SOUND);
+		}
+	}
 }

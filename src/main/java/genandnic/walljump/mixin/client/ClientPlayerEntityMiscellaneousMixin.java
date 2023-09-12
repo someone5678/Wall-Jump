@@ -1,56 +1,44 @@
 package genandnic.walljump.mixin.client;
 
-import com.mojang.authlib.GameProfile;
-import genandnic.walljump.FallingSound;
-import genandnic.walljump.WallJump;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.random.Random;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.mojang.authlib.GameProfile;
+
+import genandnic.walljump.FallingSound;
+import genandnic.walljump.WallJump;
 import genandnic.walljump.WallJumpClient;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.phys.AABB;
 
-@Mixin(ClientPlayerEntity.class)
-public class ClientPlayerEntityMiscellaneousMixin extends AbstractClientPlayerEntity {
+@Mixin(LocalPlayer.class)
+public class ClientPlayerEntityMiscellaneousMixin extends AbstractClientPlayer {
 
-    public ClientPlayerEntityMiscellaneousMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile);
-    }
+	public ClientPlayerEntityMiscellaneousMixin(ClientLevel world, GameProfile profile, ProfilePublicKey playerPublicKey) {
+		super(world, profile);
+	}
 
-    private boolean doesNotCollide(Box box) {
-        return this.getWorld().isSpaceEmpty(this, box) && !this.getWorld().containsFluid(box);
-    }
+	private boolean isFree(AABB box) {
+		return this.level().noCollision(this, box) && !this.level().containsAnyLiquid(box);
+	}
 
-    @Inject(method = "tickMovement", at = @At("TAIL"))
-    private void miscellaneousTickMovement(CallbackInfo ci) {
+	@Inject(method = "aiStep", at = @At("TAIL"))
+	private void miscellaneousTickMovement(CallbackInfo ci) {
+		if (this.horizontalCollision && WallJump.CONFIGURATION.stepAssist && this.getDeltaMovement().y() > -0.2 && this.getDeltaMovement().y() < 0.01)
+			if (this.isFree(this.getBoundingBox().inflate(0.01, -this.maxUpStep() + 0.02, 0.01)))
+				this.setOnGround(true);
 
-        if(this.horizontalCollision
-                && WallJump.CONFIGURATION.stepAssist()
-                && this.getVelocity().getY() > -0.2
-                && this.getVelocity().getY() < 0.01
-        ) {
-
-            if(this.doesNotCollide(this.getBoundingBox().expand(0.01, -this.getStepHeight() + 0.02, 0.01))) {
-                this.setOnGround(true);
-
-            }
-        }
-
-        if(this.fallDistance > 1.5 && !this.isFallFlying()) {
-
-            if(WallJump.CONFIGURATION.playFallSound() && WallJumpClient.FALLING_SOUND.isDone()) {
-
-                WallJumpClient.FALLING_SOUND = new FallingSound((ClientPlayerEntity) (Object) this, Random.create());
-                MinecraftClient.getInstance().getSoundManager().play(WallJumpClient.FALLING_SOUND);
-
-            }
-        }
-    }
+		if (this.fallDistance > 1.5 && !this.isFallFlying())
+			if (WallJump.CONFIGURATION.playFallSound && WallJumpClient.FALLING_SOUND.isStopped()) {
+				WallJumpClient.FALLING_SOUND = new FallingSound((LocalPlayer) (Object) this, RandomSource.create());
+				Minecraft.getInstance().getSoundManager().play(WallJumpClient.FALLING_SOUND);
+			}
+	}
 }

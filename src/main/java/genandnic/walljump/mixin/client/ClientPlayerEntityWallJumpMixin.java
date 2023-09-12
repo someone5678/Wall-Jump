@@ -1,321 +1,254 @@
 package genandnic.walljump.mixin.client;
 
-import com.mojang.authlib.GameProfile;
-import genandnic.walljump.WallJump;
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.input.Input;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.BlockStateParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.encryption.PlayerPublicKey;
-import net.minecraft.util.math.*;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.mojang.authlib.GameProfile;
+
+import genandnic.walljump.WallJump;
+import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.Input;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.ProfilePublicKey;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.phys.AABB;
+
+@Mixin(LocalPlayer.class)
+public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlayer {
 
-@Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlayerEntity {
+	@Shadow
+	public abstract boolean isHandsBusy();
 
-    @Shadow public abstract boolean isRiding();
-
-    @Shadow public abstract float getYaw(float tickDelta);
-
-    @Shadow public Input input;
-
-    public int ticksWallClinged;
-    private int ticksKeyDown;
-    private double clingX;
-    private double clingZ;
-    private double lastJumpY = Double.MAX_VALUE;
-    private Set<Direction> walls = new HashSet<>();
-    private Set<Direction> staleWalls = new HashSet<>();
-
-    private boolean doesNotCollide(Box box) {
-        return this.getWorld().isSpaceEmpty(this, box) && !this.getWorld().containsFluid(box);
-    }
-
-    public ClientPlayerEntityWallJumpMixin(ClientWorld world, GameProfile profile, PlayerPublicKey playerPublicKey) {
-        super(world, profile);
-    }
-
-
-    @Inject(method = "tickMovement", at = @At("TAIL"))
-    private void wallJumpTickMovement(CallbackInfo ci) {
-        this.doWallJump();
-    }
-
-    private void doWallJump() {
-
-        if(!this.canWallJump()) return;
-
-        if(this.isOnGround()
-                || this.getAbilities().flying
-                || !this.getWorld().getFluidState(this.getBlockPos()).isEmpty()
-                || this.isRiding()
-        ) {
-            this.ticksWallClinged = 0;
-            this.clingX = Double.NaN;
-            this.clingZ = Double.NaN;
-            this.lastJumpY = Double.MAX_VALUE;
-            this.staleWalls.clear();
-
-            return;
-        }
-
-        this.updateWalls();
-        this.ticksKeyDown = input.sneaking ? this.ticksKeyDown + 1 : 0;
-
-        if(this.ticksWallClinged < 1) {
-
-            if (this.ticksKeyDown > 0
-                    && this.ticksKeyDown < 4
-                    && !this.walls.isEmpty()
-                    && this.canWallCling()
-            ) {
-
-                this.limbAnimator.getSpeed(2.5F);
-                this.limbAnimator.prevSpeed = 2.5F;
-
-                if (WallJump.CONFIGURATION.autoRotation()) {
-                    this.setYaw(this.getClingDirection().getOpposite().asRotation());
-                    this.prevYaw = this.getYaw();
-                }
-
-                this.ticksWallClinged = 1;
-                this.clingX = this.getX();
-                this.clingZ = this.getZ();
-
-                this.playHitSound(this.getWallPos());
-                this.spawnWallParticle(this.getWallPos());
-            }
-
-            return;
-        }
-
-        if(!input.sneaking
-                || this.isOnGround()
-                || !this.getWorld().getFluidState(this.getBlockPos()).isEmpty()
-                || this.walls.isEmpty()
-                || this.getHungerManager().getFoodLevel() < 1
-        ) {
-
-            this.ticksWallClinged = 0;
-
-            if((this.forwardSpeed != 0 || this.sidewaysSpeed != 0)
-                    && !this.isOnGround()
-                    && !this.walls.isEmpty()
-            ) {
-
-                this.fallDistance = 0.0F;
-
-                PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
-                passedData.writeBoolean(true);
-                ClientPlayNetworking.send(WallJump.WALL_JUMP_PACKET_ID, passedData);
-
-                this.wallJump((float) WallJump.CONFIGURATION.wallJumpHeight());
-                this.staleWalls = new HashSet<>(this.walls);
-            }
-
-            return;
-        }
-
-        if(WallJump.CONFIGURATION.autoRotation()) {
-            this.setYaw(this.getClingDirection().getOpposite().asRotation());
-            this.prevYaw = this.getYaw();
-        }
-
-        this.setPos(this.clingX, this.getY(), this.clingZ);
-
-        double motionY = this.getVelocity().getY();
-
-        if(motionY > 0.0) {
-
-            motionY = 0.0;
-
-        } else if(motionY < -0.6) {
-
-            motionY = motionY + 0.2;
-            this.spawnWallParticle(this.getWallPos());
-
-        } else if(this.ticksWallClinged++ > WallJump.CONFIGURATION.wallSlideDelay()) {
-
-            motionY = -0.1;
-            this.spawnWallParticle(this.getWallPos());
-
-        } else {
-
-            motionY = 0.0;
-        }
-
-        if(this.fallDistance > 2) {
-
-            this.fallDistance = 0;
-
-            PacketByteBuf passedData = new PacketByteBuf(Unpooled.buffer());
-            passedData.writeFloat((float) (motionY * motionY * 8));
-            ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
-        }
-
-        this.setVelocity(0.0, motionY, 0.0);
-    }
-
-
-    private boolean canWallJump() {
-
-        if(WallJump.CONFIGURATION.useWallJump()) return true;
-
-        ItemStack stack = this.getEquippedStack(EquipmentSlot.FEET);
-        if(!stack.isEmpty()) {
-            Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
-            return enchantments.containsKey(WallJump.WALLJUMP_ENCHANTMENT);
-        }
-
-        return false;
-    }
-
-
-    private boolean canWallCling() {
-        if(this.isClimbing() || this.getVelocity().getY() > 0.1 || this.getHungerManager().getFoodLevel() < 1)
-            return false;
-
-        if(!this.doesNotCollide(this.getBoundingBox().offset(0, -0.8, 0)))
-            return false;
-
-        if(WallJump.CONFIGURATION.allowReClinging() || this.getY() < this.lastJumpY - 1)
-            return true;
-
-        return !this.staleWalls.containsAll(this.walls);
-    }
-
-
-    private void updateWalls() {
-
-        Box box = new Box(
-                this.getX() - 0.001,
-                this.getY(),
-                this.getZ() - 0.001,
-                this.getX() + 0.001,
-                this.getY() + this.getStandingEyeHeight(),
-                this.getZ() + 0.001
-        );
-
-        double dist = (this.getWidth() / 2) + (this.ticksWallClinged > 0 ? 0.1 : 0.06);
-
-        Box[] axes = {
-                box.stretch(0, 0, dist),
-                box.stretch(-dist, 0, 0),
-                box.stretch(0, 0, -dist),
-                box.stretch(dist, 0, 0)
-        };
-
-        int i = 0;
-        Direction direction;
-        this.walls = new HashSet<>();
-
-        for (Box axis : axes) {
-            direction = Direction.fromHorizontal(i++);
-
-            if(!this.doesNotCollide(axis)) {
-                this.walls.add(direction);
-                this.horizontalCollision = true;
-            }
-        }
-    }
-
-
-    private Direction getClingDirection() {
-
-        return this.walls.isEmpty() ? Direction.UP : this.walls.iterator().next();
-    }
-
-
-    private BlockPos getWallPos() {
-
-        BlockPos clingPos = this.getBlockPos().offset(this.getClingDirection());
-        return this.getWorld().getBlockState(clingPos).isSolid() ? clingPos : clingPos.offset(Direction.UP);
-    }
-
-
-    private void wallJump(float up) {
-
-        float strafe = Math.signum(this.sidewaysSpeed) * up * up;
-        float forward = Math.signum(this.forwardSpeed) * up * up;
-
-        float f = 1.0F / MathHelper.sqrt(strafe * strafe + up * up + forward * forward);
-        strafe = strafe * f;
-        forward = forward * f;
-
-        float f1 = MathHelper.sin(this.getHeadYaw() * 0.017453292F) * 0.45F;
-        float f2 = MathHelper.cos(this.getHeadYaw() * 0.017453292F) * 0.45F;
-
-        int jumpBoostLevel = 0;
-        StatusEffectInstance jumpBoostEffect = this.getStatusEffect(StatusEffects.JUMP_BOOST);
-        if(jumpBoostEffect != null) jumpBoostLevel = jumpBoostEffect.getAmplifier() + 1;
-
-        Vec3d motion = this.getVelocity();
-        this.setVelocity(
-                motion.getX() + (strafe * f2 - forward * f1),
-                up + (jumpBoostLevel * 0.125),
-                motion.getZ() + (forward * f2 + strafe * f1)
-        );
-
-        this.lastJumpY = this.getY();
-        this.playBreakSound(this.getWallPos());
-        this.spawnWallParticle(this.getWallPos());
-    }
-
-
-    private void playHitSound(BlockPos blockPos) {
-
-        BlockState blockState = this.getWorld().getBlockState(blockPos);
-        BlockSoundGroup soundType = blockState.getBlock().getSoundGroup(blockState);
-        this.playSound(soundType.getHitSound(), soundType.getVolume() * 0.25F, soundType.getPitch());
-    }
-
-
-    private void playBreakSound(BlockPos blockPos) {
-
-        BlockState blockState = this.getWorld().getBlockState(blockPos);
-        BlockSoundGroup soundType = blockState.getBlock().getSoundGroup(blockState);
-        this.playSound(soundType.getFallSound(), soundType.getVolume() * 0.5F, soundType.getPitch());
-    }
-
-
-    private void spawnWallParticle(BlockPos blockPos) {
-
-        BlockState blockState = this.getWorld().getBlockState(blockPos);
-        if(blockState.getRenderType() != BlockRenderType.INVISIBLE) {
-
-            Vec3d pos = this.getPos();
-            Vec3i motion = this.getClingDirection().getVector();
-            this.getWorld().addParticle(
-                    new BlockStateParticleEffect(ParticleTypes.BLOCK, blockState),
-                    pos.getX(),
-                    pos.getY(),
-                    pos.getZ(),
-                    motion.getX() * -1.0D,
-                    -1.0D,
-                    motion.getZ() * -1.0D
-            );
-        }
-    }
+	@Shadow
+	public abstract float getViewYRot(float tickDelta);
+
+	@Shadow
+	public Input input;
+
+	public int ticksWallClinged;
+	private int ticksKeyDown;
+	private double clingX;
+	private double clingZ;
+	private double lastJumpY = Double.MAX_VALUE;
+	private Set<Direction> walls = new HashSet<>();
+	private Set<Direction> staleWalls = new HashSet<>();
+
+	private boolean isFree(AABB box) {
+		return this.level().noCollision(this, box) && !this.level().containsAnyLiquid(box);
+	}
+
+	public ClientPlayerEntityWallJumpMixin(ClientLevel world, GameProfile profile, ProfilePublicKey playerPublicKey) {
+		super(world, profile);
+	}
+
+	@Inject(method = "aiStep", at = @At("TAIL"))
+	private void wallJumpTickMovement(CallbackInfo ci) {
+		this.doWallJump();
+	}
+
+	private void doWallJump() {
+
+		if (!this.canWallJump())
+			return;
+
+		if (this.onGround() || this.getAbilities().flying || !this.level().getFluidState(this.blockPosition()).isEmpty() || this.isHandsBusy()) {
+			this.ticksWallClinged = 0;
+			this.clingX = Double.NaN;
+			this.clingZ = Double.NaN;
+			this.lastJumpY = Double.MAX_VALUE;
+			this.staleWalls.clear();
+
+			return;
+		}
+
+		this.updateWalls();
+		this.ticksKeyDown = input.shiftKeyDown ? this.ticksKeyDown + 1 : 0;
+
+		if (this.ticksWallClinged < 1) {
+
+			if (this.ticksKeyDown > 0 && this.ticksKeyDown < 4 && !this.walls.isEmpty() && this.canWallCling()) {
+
+				this.walkAnimation.speed(2.5F);
+				this.walkAnimation.speedOld = 2.5F;
+
+				if (WallJump.CONFIGURATION.autoRotation) {
+					this.setYRot(this.getClingDirection().getOpposite().toYRot());
+					this.yRotO = this.getYRot();
+				}
+
+				this.ticksWallClinged = 1;
+				this.clingX = this.getX();
+				this.clingZ = this.getZ();
+
+				this.playHitSound(this.getWallPos());
+				this.spawnWallParticle(this.getWallPos());
+			}
+
+			return;
+		}
+
+		if (!input.shiftKeyDown || this.onGround() || !this.level().getFluidState(this.blockPosition()).isEmpty() || this.walls.isEmpty() || this.getFoodData().getFoodLevel() < 1) {
+
+			this.ticksWallClinged = 0;
+
+			if ((this.zza != 0 || this.xxa != 0) && !this.onGround() && !this.walls.isEmpty()) {
+
+				this.fallDistance = 0.0F;
+
+				FriendlyByteBuf passedData = new FriendlyByteBuf(Unpooled.buffer());
+				passedData.writeBoolean(true);
+				ClientPlayNetworking.send(WallJump.WALL_JUMP_PACKET_ID, passedData);
+
+				this.wallJump((float) WallJump.CONFIGURATION.wallJumpHeight);
+				this.staleWalls = new HashSet<>(this.walls);
+			}
+
+			return;
+		}
+
+		if (WallJump.CONFIGURATION.autoRotation) {
+			this.setYRot(this.getClingDirection().getOpposite().toYRot());
+			this.yRotO = this.getYRot();
+		}
+
+		this.setPosRaw(this.clingX, this.getY(), this.clingZ);
+
+		var motionY = this.getDeltaMovement().y();
+
+		if (motionY > 0.0)
+			motionY = 0.0;
+		else if (motionY < -0.6) {
+			motionY = motionY + 0.2;
+			this.spawnWallParticle(this.getWallPos());
+		} else if (this.ticksWallClinged++ > WallJump.CONFIGURATION.wallSlideDelay) {
+			motionY = -0.1;
+			this.spawnWallParticle(this.getWallPos());
+		} else
+			motionY = 0.0;
+
+		if (this.fallDistance > 2) {
+			this.fallDistance = 0;
+			var passedData = new FriendlyByteBuf(Unpooled.buffer());
+			passedData.writeFloat((float) (motionY * motionY * 8));
+			ClientPlayNetworking.send(WallJump.FALL_DISTANCE_PACKET_ID, passedData);
+		}
+
+		this.setDeltaMovement(0.0, motionY, 0.0);
+	}
+
+	private boolean canWallJump() {
+		if (WallJump.CONFIGURATION.useWallJump)
+			return true;
+
+		var stack = this.getItemBySlot(EquipmentSlot.FEET);
+		if (!stack.isEmpty()) {
+			var enchantments = EnchantmentHelper.getEnchantments(stack);
+			return enchantments.containsKey(WallJump.WALLJUMP_ENCHANTMENT);
+		}
+		return false;
+	}
+
+	private boolean canWallCling() {
+		if (this.onClimbable() || this.getDeltaMovement().y() > 0.1 || this.getFoodData().getFoodLevel() < 1)
+			return false;
+
+		if (!this.isFree(this.getBoundingBox().move(0, -0.8, 0)))
+			return false;
+
+		if (WallJump.CONFIGURATION.allowReClinging || this.getY() < this.lastJumpY - 1)
+			return true;
+
+		return !this.staleWalls.containsAll(this.walls);
+	}
+
+	private void updateWalls() {
+		var box = new AABB(this.getX() - 0.001, this.getY(), this.getZ() - 0.001, this.getX() + 0.001, this.getY() + this.getEyeHeight(), this.getZ() + 0.001);
+
+		var dist = (this.getBbWidth() / 2) + (this.ticksWallClinged > 0 ? 0.1 : 0.06);
+
+		AABB[] axes = { box.expandTowards(0, 0, dist), box.expandTowards(-dist, 0, 0), box.expandTowards(0, 0, -dist), box.expandTowards(dist, 0, 0) };
+
+		var i = 0;
+		Direction direction;
+		this.walls = new HashSet<>();
+
+		for (var axis : axes) {
+			direction = Direction.from2DDataValue(i++);
+			if (!this.isFree(axis)) {
+				this.walls.add(direction);
+				this.horizontalCollision = true;
+			}
+		}
+	}
+
+	private Direction getClingDirection() {
+		return this.walls.isEmpty() ? Direction.UP : this.walls.iterator().next();
+	}
+
+	private BlockPos getWallPos() {
+		var clingPos = this.blockPosition().relative(this.getClingDirection());
+		return this.level().getBlockState(clingPos).isSolid() ? clingPos : clingPos.relative(Direction.UP);
+	}
+
+	private void wallJump(float up) {
+		var strafe = Math.signum(this.xxa) * up * up;
+		var forward = Math.signum(this.zza) * up * up;
+		var f = 1.0F / Mth.sqrt(strafe * strafe + up * up + forward * forward);
+		strafe = strafe * f;
+		forward = forward * f;
+
+		var f1 = Mth.sin(this.getYHeadRot() * 0.017453292F) * 0.45F;
+		var f2 = Mth.cos(this.getYHeadRot() * 0.017453292F) * 0.45F;
+
+		var jumpBoostLevel = 0;
+		var jumpBoostEffect = this.getEffect(MobEffects.JUMP);
+		if (jumpBoostEffect != null)
+			jumpBoostLevel = jumpBoostEffect.getAmplifier() + 1;
+
+		var motion = this.getDeltaMovement();
+		this.setDeltaMovement(motion.x() + (strafe * f2 - forward * f1), up + (jumpBoostLevel * 0.125), motion.z() + (forward * f2 + strafe * f1));
+
+		this.lastJumpY = this.getY();
+		this.playBreakSound(this.getWallPos());
+		this.spawnWallParticle(this.getWallPos());
+	}
+
+	private void playHitSound(BlockPos blockPos) {
+		var blockState = this.level().getBlockState(blockPos);
+		var soundType = blockState.getBlock().getSoundType(blockState);
+		this.playSound(soundType.getHitSound(), soundType.getVolume() * 0.25F, soundType.getPitch());
+	}
+
+	private void playBreakSound(BlockPos blockPos) {
+		var blockState = this.level().getBlockState(blockPos);
+		var soundType = blockState.getBlock().getSoundType(blockState);
+		this.playSound(soundType.getFallSound(), soundType.getVolume() * 0.5F, soundType.getPitch());
+	}
+
+	private void spawnWallParticle(BlockPos blockPos) {
+		var blockState = this.level().getBlockState(blockPos);
+		if (blockState.getRenderShape() != RenderShape.INVISIBLE) {
+			var pos = this.position();
+			var motion = this.getClingDirection().getNormal();
+			this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, blockState), pos.x(), pos.y(), pos.z(), motion.getX() * -1.0D, -1.0D, motion.getZ() * -1.0D);
+		}
+	}
 }

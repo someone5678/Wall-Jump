@@ -1,45 +1,66 @@
 package genandnic.walljump;
-import org.aeonbits.owner.Accessible;
 
-public interface WallJumpConfig extends Accessible {
+import mod.azure.azurelib.config.Config;
+import mod.azure.azurelib.config.Configurable;
 
-    @DefaultValue("false")
-    boolean allowReClinging();
+@Config(id = "walljump")
+public class WallJumpConfig {
 
-    @DefaultValue("false")
-    boolean autoRotation();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean allowReClinging = false;
 
-    @DefaultValue("0.0")
-    double elytraSpeedBoost();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean autoRotation = false;
 
-    @DefaultValue("true")
-    boolean enableEnchantments();
+	@Configurable
+	@Configurable.Synchronized
+	@Configurable.DecimalRange(min = 0.0)
+	public double elytraSpeedBoost = 0.0;
 
-    @DefaultValue("0.8")
-    double exhaustionWallJump();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean enableEnchantments = true;
 
-    @DefaultValue("7.5")
-    double minFallDistance();
+	@Configurable
+	@Configurable.Synchronized
+	@Configurable.DecimalRange(min = 0.0)
+	public float exhaustionWallJump = 0.8f;
 
-    @DefaultValue("true")
-    boolean playFallSound();
+	@Configurable
+	@Configurable.Synchronized
+	@Configurable.DecimalRange(min = 0.0)
+	public double minFallDistance = 7.5;
 
-    @DefaultValue("0.0")
-    double sprintSpeedBoost();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean playFallSound = true;
 
-    @DefaultValue("true")
-    boolean stepAssist();
+	@Configurable
+	@Configurable.Synchronized
+	@Configurable.DecimalRange(min = 0.0)
+	public double sprintSpeedBoost = 0.0;
 
-    @DefaultValue("false")
-    boolean useDoubleJump();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean stepAssist = true;
 
-    @DefaultValue("true")
-    boolean useWallJump();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean useDoubleJump = false;
 
-    @DefaultValue("0.55")
-    double wallJumpHeight();
+	@Configurable
+	@Configurable.Synchronized
+	public boolean useWallJump = true;
 
-    @DefaultValue("15")
-    int wallSlideDelay();
+	@Configurable
+	@Configurable.Synchronized
+	@Configurable.DecimalRange(min = 0.0)
+	public double wallJumpHeight = 0.55;
+
+	@Configurable
+	@Configurable.Synchronized
+	@Configurable.DecimalRange(min = 1)
+	public int wallSlideDelay = 15;
 }
-

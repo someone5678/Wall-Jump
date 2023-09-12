@@ -1,3 +1,3 @@
 accessWidener	v1	named
-accessible    method    net/minecraft/entity/Entity    handleFallDamage    (FFLnet/minecraft/entity/damage/DamageSource;)Z
-accessible field net/minecraft/entity/LimbAnimator prevSpeed F
+accessible method net/minecraft/world/entity/Entity causeFallDamage (FFLnet/minecraft/world/damagesource/DamageSource;)Z
+accessible field net/minecraft/world/entity/WalkAnimationState speedOld F
