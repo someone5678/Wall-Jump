@@ -1,43 +1,38 @@
-buildscript {
-    repositories {
-    	maven { url  = 'https://plugins.gradle.org/m2/' }
-    }
-}
-
 plugins {
-    id 'fabric-loom' version '1.1-SNAPSHOT'
+    id 'fabric-loom' version '1.3-SNAPSHOT'
     id 'maven-publish'
     id 'com.matthewprenger.cursegradle' version '1.4.0'
     id "com.modrinth.minotaur" version "2.+"
 }
+
 import com.modrinth.minotaur.dependencies.ModDependency
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
+base {
+    archivesName = project.modName
+}
+version = project.modVersion
+group = project.mavenGroup
 
- loom {
+loom {
  	accessWidenerPath = file("./src/main/resources/walljump.aw")
- }
+}
 
 repositories {
-    maven {
-        name = "Fabric"
-        url = "https://maven.fabricmc.net/"
-    }
     jcenter()
+    maven { url 'https://libs.azuredoom.com:4443/mods' }
 }
 
 dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    implementation "org.aeonbits.owner:owner:${project.owner_version}"
-    include "org.aeonbits.owner:owner:${project.owner_version}"
+    minecraft "com.mojang:minecraft:${project.minecraftVersion}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
+    implementation "org.aeonbits.owner:owner:${project.ownerVersion}"
+    include "org.aeonbits.owner:owner:${project.ownerVersion}"  	
+    modImplementation "mod.azure.azurelib:azurelib-fabric-${project.minecraftVersion}:${project.azurelibVersion}"
 }
 
 processResources {
@@ -49,37 +44,12 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
     it.options.release = 17
     it.options.encoding = "UTF-8"
 }
 
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-}
-
 jar {
     from "LICENSE"
-}
-
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
-
-	repositories {
-		// mavenLocal()
-	}
 }
 
 if (file('key.properties').exists()) {
@@ -91,7 +61,7 @@ if (file('key.properties').exists()) {
 
     project {
         apiKey = curseProp.getProperty('curseKey')
-        id = "858060"
+        id = "${project.curseID}"
         releaseType = "release"
         changelogType = 'text'
         changelog = file('changelog.txt')
@@ -100,7 +70,8 @@ if (file('key.properties').exists()) {
         addGameVersion("Java 17")
 
         relations {
-            requiredDependency 'fabric-api'      
+            requiredDependency 'fabric-api'     
+            requiredDependency 'azurelib'  
         }
         mainArtifact(remapJar)
 
@@ -109,7 +80,6 @@ if (file('key.properties').exists()) {
         }
     }
     options {
-    	//debug = true
         forgeGradleIntegration = false
     }
    }
@@ -122,9 +92,8 @@ if (file('key.properties').exists()) {
 		modrinthProp.load(secretPropsFile.newInputStream())
 		
 		token = modrinthProp.getProperty('modrinthKey')
-		projectId = 'ulUgV6dN' 
-		versionNumber = project.mod_version 
-		versionName = 'Fabric 1.20.1'
+		projectId = project.modrinthID
+		versionNumber = project.modVersion 
 		uploadFile = remapJar 
 		changelog = rootProject.file("changelog.txt").text
 		gameVersions = ['1.20.1']
@@ -132,6 +101,7 @@ if (file('key.properties').exists()) {
 		loaders = ['fabric', 'quilt']
 		dependencies { 
         	required.project "fabric-api"
+        	required.project "azurelib"
    		}
 	}
 }
