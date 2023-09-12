@@ -1,3 +1,4 @@
-v1.3.6
+v1.4.0
 
-- Updated for 1.20.1
+- Rewrote mod in Mojmaps/Clean up.
+- Moved Configs to Azurelib Config system, allowing Server -> Client config sycning.
