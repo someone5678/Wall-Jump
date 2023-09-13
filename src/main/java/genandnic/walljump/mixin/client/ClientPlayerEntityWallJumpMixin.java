@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.mojang.authlib.GameProfile;
 
 import genandnic.walljump.WallJump;
+import genandnic.walljump.helper.Keybindings;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -80,7 +81,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 		}
 
 		this.updateWalls();
-		this.ticksKeyDown = input.shiftKeyDown ? this.ticksKeyDown + 1 : 0;
+		this.ticksKeyDown = Keybindings.CLING.isDown() ? this.ticksKeyDown + 1 : 0;
 
 		if (this.ticksWallClinged < 1) {
 
@@ -105,7 +106,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 			return;
 		}
 
-		if (!input.shiftKeyDown || this.onGround() || !this.level().getFluidState(this.blockPosition()).isEmpty() || this.walls.isEmpty() || this.getFoodData().getFoodLevel() < 1) {
+		if (!Keybindings.CLING.isDown() || this.onGround() || !this.level().getFluidState(this.blockPosition()).isEmpty() || this.walls.isEmpty() || this.getFoodData().getFoodLevel() < 1) {
 
 			this.ticksWallClinged = 0;
 
