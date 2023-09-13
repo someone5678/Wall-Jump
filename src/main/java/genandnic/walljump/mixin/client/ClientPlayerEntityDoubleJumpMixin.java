@@ -79,7 +79,7 @@ public abstract class ClientPlayerEntityDoubleJumpMixin extends AbstractClientPl
 
 	private int getMultiJumps() {
 		var jumpCount = 0;
-		if (WallJump.CONFIGURATION.useDoubleJump)
+		if (WallJump.CONFIGURATION.doubleconfigs.useDoubleJump)
 			jumpCount += 1;
 
 		var stack = this.getItemBySlot(EquipmentSlot.FEET);

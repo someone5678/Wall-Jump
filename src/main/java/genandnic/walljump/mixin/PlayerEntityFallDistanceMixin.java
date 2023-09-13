@@ -17,7 +17,7 @@ public abstract class PlayerEntityFallDistanceMixin {
 
 	@ModifyArg(method = "causeFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;causeFallDamage(FFLnet/minecraft/world/damagesource/DamageSource;)Z"), index = 0)
 	private float adjustFallDistance(float value) {
-		if (value > 3 && value <= WallJump.CONFIGURATION.minFallDistance) {
+		if (value > 3 && value <= WallJump.CONFIGURATION.doubleconfigs.minFallDistance) {
 			this.playSound(SoundEvents.GENERIC_SMALL_FALL, 0.5F, 1.0F);
 			return 3.0F;
 		}

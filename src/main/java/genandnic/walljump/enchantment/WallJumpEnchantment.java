@@ -19,7 +19,7 @@ public class WallJumpEnchantment extends Enchantment {
 
 	@Override
 	public int getMaxLevel() {
-		return 1;
+		return WallJump.CONFIGURATION.enchantconfigs.walljump_maxlevel;
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class WallJumpEnchantment extends Enchantment {
 	@Override
 	public boolean canEnchant(ItemStack stack) {
 
-		if (WallJump.CONFIGURATION.useWallJump || !WallJump.CONFIGURATION.enableEnchantments)
+		if (WallJump.CONFIGURATION.jumpconfigs.useWallJump || !WallJump.CONFIGURATION.enchantconfigs.enableEnchantments)
 			return false;
 
 		return stack.isEnchantable();

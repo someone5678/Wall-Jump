@@ -51,7 +51,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
 				if (this.getXRot() < 30F)
 					this.setDeltaMovement(motion.subtract(motion.scale(0.05)));
 				else if (this.isSprinting()) {
-					var elytraSpeedBoost = (float) WallJump.CONFIGURATION.elytraSpeedBoost + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
+					var elytraSpeedBoost = (float) WallJump.CONFIGURATION.speedconfigs.elytraSpeedBoost + (getEquipmentBoost(EquipmentSlot.CHEST) * 0.75F);
 					var boost = new Vec3(look.x(), look.y() + 0.5, look.z()).normalize().scale(elytraSpeedBoost);
 					if (motion.length() <= boost.length())
 						this.setDeltaMovement(motion.add(boost.scale(0.05)));
@@ -60,7 +60,7 @@ public abstract class ClientPlayerEntitySpeedBoostMixin extends AbstractClientPl
 				}
 
 		} else if (this.isSprinting()) {
-			var sprintSpeedBoost = (float) WallJump.CONFIGURATION.sprintSpeedBoost + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
+			var sprintSpeedBoost = (float) WallJump.CONFIGURATION.speedconfigs.sprintSpeedBoost + (getEquipmentBoost(EquipmentSlot.FEET) * 0.375F);
 			if (!this.onGround())
 				sprintSpeedBoost /= 3.125;
 			var boost = new Vec3(look.x(), 0.0, look.z()).scale(sprintSpeedBoost * 0.125F);

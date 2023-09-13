@@ -19,7 +19,7 @@ public class SpeedBoostEnchantment extends Enchantment {
 
 	@Override
 	public int getMaxLevel() {
-		return 3;
+		return WallJump.CONFIGURATION.enchantconfigs.speedboost_maxlevel;
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public class SpeedBoostEnchantment extends Enchantment {
 	@Override
 	public boolean canEnchant(ItemStack stack) {
 
-		if (!WallJump.CONFIGURATION.enableEnchantments)
+		if (!WallJump.CONFIGURATION.enchantconfigs.enableEnchantments)
 			return false;
 
 		return stack.isEnchantable() || stack.getItem() instanceof ElytraItem;

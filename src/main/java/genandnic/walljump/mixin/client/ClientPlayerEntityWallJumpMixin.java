@@ -90,7 +90,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 				this.walkAnimation.speed(2.5F);
 				this.walkAnimation.speedOld = 2.5F;
 
-				if (WallJump.CONFIGURATION.autoRotation) {
+				if (WallJump.CONFIGURATION.jumpconfigs.autoRotation) {
 					this.setYRot(this.getClingDirection().getOpposite().toYRot());
 					this.yRotO = this.getYRot();
 				}
@@ -118,14 +118,14 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 				passedData.writeBoolean(true);
 				ClientPlayNetworking.send(WallJump.WALL_JUMP_PACKET_ID, passedData);
 
-				this.wallJump((float) WallJump.CONFIGURATION.wallJumpHeight);
+				this.wallJump(WallJump.CONFIGURATION.jumpconfigs.wallJumpXextra, WallJump.CONFIGURATION.jumpconfigs.wallJumpHeight, WallJump.CONFIGURATION.jumpconfigs.wallJumpZextra);
 				this.staleWalls = new HashSet<>(this.walls);
 			}
 
 			return;
 		}
 
-		if (WallJump.CONFIGURATION.autoRotation) {
+		if (WallJump.CONFIGURATION.jumpconfigs.autoRotation) {
 			this.setYRot(this.getClingDirection().getOpposite().toYRot());
 			this.yRotO = this.getYRot();
 		}
@@ -139,7 +139,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 		else if (motionY < -0.6) {
 			motionY = motionY + 0.2;
 			this.spawnWallParticle(this.getWallPos());
-		} else if (this.ticksWallClinged++ > WallJump.CONFIGURATION.wallSlideDelay) {
+		} else if (this.ticksWallClinged++ > WallJump.CONFIGURATION.jumpconfigs.wallSlideDelay) {
 			motionY = -0.1;
 			this.spawnWallParticle(this.getWallPos());
 		} else
@@ -156,7 +156,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 	}
 
 	private boolean canWallJump() {
-		if (WallJump.CONFIGURATION.useWallJump)
+		if (WallJump.CONFIGURATION.jumpconfigs.useWallJump)
 			return true;
 
 		var stack = this.getItemBySlot(EquipmentSlot.FEET);
@@ -174,7 +174,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 		if (!this.isFree(this.getBoundingBox().move(0, -0.8, 0)))
 			return false;
 
-		if (WallJump.CONFIGURATION.allowReClinging || this.getY() < this.lastJumpY - 1)
+		if (WallJump.CONFIGURATION.jumpconfigs.allowReClinging || (this.getY() < this.lastJumpY - 1 || this.getY() > this.lastJumpY + 1))
 			return true;
 
 		return !this.staleWalls.containsAll(this.walls);
@@ -209,7 +209,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 		return this.level().getBlockState(clingPos).isSolid() ? clingPos : clingPos.relative(Direction.UP);
 	}
 
-	private void wallJump(float up) {
+	private void wallJump(float x, float up, float z) {
 		var strafe = Math.signum(this.xxa) * up * up;
 		var forward = Math.signum(this.zza) * up * up;
 		var f = 1.0F / Mth.sqrt(strafe * strafe + up * up + forward * forward);
@@ -225,7 +225,7 @@ public abstract class ClientPlayerEntityWallJumpMixin extends AbstractClientPlay
 			jumpBoostLevel = jumpBoostEffect.getAmplifier() + 1;
 
 		var motion = this.getDeltaMovement();
-		this.setDeltaMovement(motion.x() + (strafe * f2 - forward * f1), up + (jumpBoostLevel * 0.125), motion.z() + (forward * f2 + strafe * f1));
+		this.setDeltaMovement(motion.x() + (strafe * f2 - forward * f1) + x + (jumpBoostLevel * 0.125), up + (jumpBoostLevel * 0.125), motion.z() + (forward * f2 + strafe * f1) + z + (jumpBoostLevel * 0.125));
 
 		this.lastJumpY = this.getY();
 		this.playBreakSound(this.getWallPos());

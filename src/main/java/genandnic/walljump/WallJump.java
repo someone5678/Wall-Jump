@@ -31,15 +31,18 @@ public class WallJump implements ModInitializer {
 		// Configuration
 		CONFIGURATION = AzureLibMod.registerConfig(WallJumpConfig.class, ConfigFormats.json()).getConfigInstance();
 
-		if (CONFIGURATION.enableEnchantments) {
+		if (CONFIGURATION.enchantconfigs.enableEnchantments) {
 			// Enchantments
-			WALLJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "walljump"), new WallJumpEnchantment(Enchantment.Rarity.UNCOMMON, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+			if (CONFIGURATION.enchantconfigs.enableWallJumpEnchantment)
+				WALLJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "walljump"), new WallJumpEnchantment(Enchantment.Rarity.UNCOMMON, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
 
-			DOUBLEJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "doublejump"), new DoubleJumpEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+			if (CONFIGURATION.enchantconfigs.enableDoubleJumpEnchantment)
+				DOUBLEJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "doublejump"), new DoubleJumpEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
 
-			SPEEDBOOST_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "speedboost"), new SpeedBoostEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+			if (CONFIGURATION.enchantconfigs.enableSpeedboostEnchantment)
+				SPEEDBOOST_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "speedboost"), new SpeedBoostEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
 		}
-		
+
 		// Packets
 		ServerPlayNetworking.registerGlobalReceiver(FALL_DISTANCE_PACKET_ID, (server, player, handler, buf, responseSender) -> {
 			var fallDistance = buf.readFloat();
@@ -52,7 +55,7 @@ public class WallJump implements ModInitializer {
 			var didWallJump = buf.readBoolean();
 			server.execute(() -> {
 				if (didWallJump)
-					player.causeFoodExhaustion(CONFIGURATION.exhaustionWallJump);
+					player.causeFoodExhaustion(CONFIGURATION.jumpconfigs.exhaustionWallJump);
 			});
 		});
 	}
