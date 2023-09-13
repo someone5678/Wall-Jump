@@ -31,13 +31,15 @@ public class WallJump implements ModInitializer {
 		// Configuration
 		CONFIGURATION = AzureLibMod.registerConfig(WallJumpConfig.class, ConfigFormats.json()).getConfigInstance();
 
-		// Enchantments
-		WALLJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "walljump"), new WallJumpEnchantment(Enchantment.Rarity.UNCOMMON, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+		if (CONFIGURATION.enableEnchantments) {
+			// Enchantments
+			WALLJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "walljump"), new WallJumpEnchantment(Enchantment.Rarity.UNCOMMON, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
 
-		DOUBLEJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "doublejump"), new DoubleJumpEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+			DOUBLEJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "doublejump"), new DoubleJumpEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
 
-		SPEEDBOOST_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "speedboost"), new SpeedBoostEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
-
+			SPEEDBOOST_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "speedboost"), new SpeedBoostEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+		}
+		
 		// Packets
 		ServerPlayNetworking.registerGlobalReceiver(FALL_DISTANCE_PACKET_ID, (server, player, handler, buf, responseSender) -> {
 			var fallDistance = buf.readFloat();
