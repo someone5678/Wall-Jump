@@ -1,8 +1,4 @@
-v1.4.1
+v1.4.2
 
-- Adds option to disable alll enchantments at once. 
-- Adds configurable keybind for Wall Clinging.
-- Adds option to disable select enchantments.
-- Adds option to set each enchantments max level.
-- Adds configs for Wall Jumping X and Z offsets.
-- Adds Auto Generated Spanish, Franch, Japanese, Korean, Portuguese and Thai lang files. Feel free to PR if anything is incorrect! 
+- Adds AzureLib to depend list in mod json.
+- Adds keybind conflict fix.
