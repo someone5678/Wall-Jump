@@ -33,7 +33,11 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loaderVersion}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabricVersion}"
     implementation "org.aeonbits.owner:owner:${project.ownerVersion}"
-    include "org.aeonbits.owner:owner:${project.ownerVersion}"  	
+    include "org.aeonbits.owner:owner:${project.ownerVersion}" 
+    modImplementation "maven.modrinth:keybind-fix:1.0.0"
+    include "maven.modrinth:keybind-fix:1.0.0"
+    modImplementation "maven.modrinth:fabric-language-kotlin:1.10.10+kotlin.1.9.10"
+    include "maven.modrinth:fabric-language-kotlin:1.10.10+kotlin.1.9.10"
     modImplementation "mod.azure.azurelib:azurelib-fabric-${project.minecraftVersion}:${project.azurelibVersion}"
     include "mod.azure.azurelib:azurelib-fabric-${project.minecraftVersion}:${project.azurelibVersion}"
 	modCompileOnly "com.terraformersmc:modmenu:${project.modmenuVersion}"
@@ -69,7 +73,7 @@ if (file('key.properties').exists()) {
         releaseType = "release"
         changelogType = 'text'
         changelog = file('changelog.txt')
-		addGameVersion("1.20.1")
+		addGameVersion("1.20.2")
         addGameVersion("Forge")
         addGameVersion("Java 17")
 
@@ -100,7 +104,7 @@ if (file('key.properties').exists()) {
 		versionNumber = project.modVersion 
 		uploadFile = remapJar 
 		changelog = rootProject.file("changelog.txt").text
-		gameVersions = ['1.20.1']
+		gameVersions = ['1.20.2']
 		versionType = "release"
 		loaders = ['forge']
 		dependencies { 

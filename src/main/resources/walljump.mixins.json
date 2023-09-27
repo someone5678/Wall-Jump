@@ -6,7 +6,6 @@
     "PlayerEntityFallDistanceMixin"
   ],
   "client": [
-    "client.ClientWorldFallingSoundMixin",
     "client.ClientPlayerEntityWallJumpMixin",
     "client.ClientPlayerEntityDoubleJumpMixin",
     "client.ClientPlayerEntityMiscellaneousMixin",
