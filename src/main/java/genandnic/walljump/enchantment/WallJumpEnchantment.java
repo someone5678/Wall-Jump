@@ -8,7 +8,7 @@ import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 public class WallJumpEnchantment extends Enchantment {
 
-	public WallJumpEnchantment(Enchantment.Rarity weight, EnchantmentCategory target, EquipmentSlot[] slots) {
+	public WallJumpEnchantment(Enchantment.Rarity weight, EnchantmentCategory target, EquipmentSlot... slots) {
 		super(weight, target, slots);
 	}
 

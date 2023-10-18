@@ -9,7 +9,7 @@ import net.minecraft.world.item.enchantment.ProtectionEnchantment;
 
 public class DoubleJumpEnchantment extends Enchantment {
 
-	public DoubleJumpEnchantment(Enchantment.Rarity weight, EnchantmentCategory target, EquipmentSlot[] slots) {
+	public DoubleJumpEnchantment(Enchantment.Rarity weight, EnchantmentCategory target, EquipmentSlot... slots) {
 		super(weight, target, slots);
 	}
 

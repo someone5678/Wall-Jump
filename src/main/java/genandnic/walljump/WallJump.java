@@ -34,13 +34,13 @@ public class WallJump implements ModInitializer {
 		if (CONFIGURATION.enchantconfigs.enableEnchantments) {
 			// Enchantments
 			if (CONFIGURATION.enchantconfigs.enableWallJumpEnchantment)
-				WALLJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "walljump"), new WallJumpEnchantment(Enchantment.Rarity.UNCOMMON, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+				WALLJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "walljump"), new WallJumpEnchantment(Enchantment.Rarity.UNCOMMON, EnchantmentCategory.ARMOR_FEET, EquipmentSlot.FEET));
 
 			if (CONFIGURATION.enchantconfigs.enableDoubleJumpEnchantment)
-				DOUBLEJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "doublejump"), new DoubleJumpEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+				DOUBLEJUMP_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "doublejump"), new DoubleJumpEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, EquipmentSlot.FEET));
 
 			if (CONFIGURATION.enchantconfigs.enableSpeedboostEnchantment)
-				SPEEDBOOST_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "speedboost"), new SpeedBoostEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, new EquipmentSlot[] { EquipmentSlot.FEET }));
+				SPEEDBOOST_ENCHANTMENT = Registry.register(BuiltInRegistries.ENCHANTMENT, new ResourceLocation("walljump", "speedboost"), new SpeedBoostEnchantment(Enchantment.Rarity.RARE, EnchantmentCategory.ARMOR_FEET, EquipmentSlot.FEET));
 		}
 
 		// Packets

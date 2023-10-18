@@ -1,4 +1,3 @@
-v1.4.2
+v1.4.2b
 
-- Adds AzureLib to depend list in mod json.
-- Adds keybind conflict fix.
+- Updates bundled AzureLib version to latest.
